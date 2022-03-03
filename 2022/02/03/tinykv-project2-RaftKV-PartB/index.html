@@ -20,7 +20,7 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1645667358854" as="style">
+  <link rel="preload" href="/css/style.css?time=1646293509451" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
@@ -36,7 +36,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-02-03T09:56:59.000Z">
-<meta property="article:modified_time" content="2022-02-24T01:48:45.881Z">
+<meta property="article:modified_time" content="2022-02-24T09:20:24.296Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="tinykv">
 <meta name="twitter:card" content="summary">
@@ -1628,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1645667358854" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1645667358854"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1646293509451" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1646293509451"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2490,7 +2490,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <h3 id="5-panic-region-1-2-unexpected-raft-log-index"><a href="#5-panic-region-1-2-unexpected-raft-log-index" class="headerlink" title="5. panic: [region 1] 2 unexpected raft log index"></a>5. panic: [region 1] 2 unexpected raft log index</h3><p>— FAIL: TestPersistPartition2B (27.40s)<br>panic: [region 1] 2 unexpected raft log index: lastIndex 33539 &lt; appliedIndex 33810 [recovered]</p>
 <p>看起来像是 lastIndex 持久化的逻辑有问题, 重启节点时监测到 lastIndex 比 appliedIndex 更小, 引发 panic.<br>修改了持久化的逻辑后变成了偶现 bug, 1% 几率出现. 修复问题 6 后消失.</p>
 <h3 id="6-panic-runtime-error-index-out-of-range-1091-with-length-1087"><a href="#6-panic-runtime-error-index-out-of-range-1091-with-length-1087" class="headerlink" title="6. panic: runtime error: index out of range [1091] with length 1087"></a>6. panic: runtime error: index out of range [1091] with length 1087</h3><p>偶现 bug, 3% 几率出现.<br>bug 出现时, 这两个 index 的差值绝大多数时候为 5, length 为 1087 时, 最后一个元素应该是 [1086].<br>看了日志, 在 partition 情况下才会发生. leader progress 里存储的 next 比自身的 lastIndex 大了更多.<br>加日志后实锤, append entries 返回了大于 leader.lastIndex 的 index, leader 用这个 index 更新了 next,<br>于是出现了数组越界.</p>
-<p>错误原因:<br>becomeFollower 时将 Vote 设置为了 None, partition 后有可能选出两个 leader.</p>
+<p>错误原因:<br>becomeFollower 时将 Vote 设置为了 None, partition 后有可能选出两个</p>
 <h3 id="7-panic-len-resp-Responses-1"><a href="#7-panic-len-resp-Responses-1" class="headerlink" title="7. panic: len(resp.Responses) != 1"></a>7. panic: len(resp.Responses) != 1</h3><p>偶现 bug, 1% 几率出现.<br>panic: len(resp.Responses) != 1</p>
 <p>goroutine 439 [running]:<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPutCF(0xc00011f5c0, 0x47f01a0, 0x7, 0xc22a37f5d0, 0xa, 0x10, 0xc22a37f5e0, 0x9, 0x10)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:308 +0x24d<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPut(…)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:298<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.GenericTest.func1(0x1, 0xc000001e00)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:211 +0x41f<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.runClient(0xc000001e00, 0x1, 0xc21c12fb60, 0xc21e28acf0)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:27 +0x7a<br>created by github.com/pingcap-incubator/tinykv/kv/test_raftstore.SpawnClientsAndWait<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:37 +0xb2<br>FAIL    github.com/pingcap-incubator/tinykv/kv/test_raftstore    23.630s<br>FAIL<br>rm -rf /tmp/<em>test-raftstore</em></p>
 <p>修复问题 6 后消失.</p>
@@ -2530,7 +2530,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-02-24T09:48:45+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-02-24T17:20:24+08:00">
   <a class='notlink' href="/" onclick="return false;" title="Click me!" >
     <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
     <p>更新于：2022年2月24日</p>
@@ -2615,8 +2615,14 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       
         <a class='prev' href='/2022/02/24/tinykv-project2-RaftKV-PartC/'>
           <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>tinykv-project2-RaftKV-PartC</p>
-          <p class='content'>
-</p>
+          <p class='content'>tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.
+
+
+snapshot 的实现分为两个部分.
+
+实现日志的定期清理.
+实现 snapshot 数据的发送.
+...</p>
         </a>
       
       
@@ -2841,8 +2847,8 @@ follow 在...</p>
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1645667358854')
-      volantis.js('/js/message.js?time=1645667358854', () => {
+      volantis.css('/css/message.css?time=1646293509451')
+      volantis.js('/js/message.js?time=1646293509451', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2887,8 +2893,8 @@ follow 在...</p>
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1645667358854')
-      volantis.js('/js/message.js?time=1645667358854', () => {
+      volantis.css('/css/message.css?time=1646293509451')
+      volantis.js('/js/message.js?time=1646293509451', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2947,8 +2953,8 @@ follow 在...</p>
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1645667358854')
-      volantis.js('/js/message.js?time=1645667358854', () => {
+      volantis.css('/css/message.css?time=1646293509451')
+      volantis.js('/js/message.js?time=1646293509451', () => {
         hideMessage(done);
       });
     } else {
@@ -3166,7 +3172,7 @@ follow 在...</p>
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1645667358854')
+    volantis.js('/js/rightMenu.js?time=1646293509451')
   </script>
 
 
@@ -3180,19 +3186,19 @@ follow 在...</p>
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1645667358854")
+        volantis.js("/js/plugins/sites.js?time=1646293509451")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1645667358854")
+        volantis.js("/js/plugins/friends.js?time=1646293509451")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1645667358854")
+        volantis.js("/js/plugins/contributors.js?time=1646293509451")
       }
     
   };
@@ -3308,7 +3314,7 @@ follow 在...</p>
 
 
 
-<script src="/js/app.js?time=1645667358854.js"></script>
+<script src="/js/app.js?time=1646293509451.js"></script>
 
 
 <!-- optional -->
@@ -3429,7 +3435,7 @@ follow 在...</p>
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1645667358854').then(()=>{
+    volantis.js('/js/parallax.js?time=1646293509451').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3623,7 +3629,7 @@ follow 在...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","name":"tinykv-project2-RaftKV-PartB"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartB","description":"tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.","datePublished":"2022-02-03T09:56:59.000Z","dateModified":"2022-02-24T01:48:45.881Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","wordCount":49,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","name":"tinykv-project2-RaftKV-PartB"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartB","description":"tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.","datePublished":"2022-02-03T09:56:59.000Z","dateModified":"2022-02-24T09:20:24.296Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","wordCount":49,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->
