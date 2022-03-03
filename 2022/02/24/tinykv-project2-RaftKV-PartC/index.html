@@ -20,7 +20,7 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1646293509445" as="style">
+  <link rel="preload" href="/css/style.css?time=1646297030159" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
@@ -36,7 +36,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-02-24T01:48:10.000Z">
-<meta property="article:modified_time" content="2022-03-03T07:45:00.880Z">
+<meta property="article:modified_time" content="2022-03-03T08:43:42.840Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="tinykv">
 <meta name="twitter:card" content="summary">
@@ -1628,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1646293509445" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1646293509445"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1646297030159" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1646297030159"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2479,8 +2479,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>修改 SaveRaftReady() 中应用 snapshot 和 append entries 的顺序后修复.</p>
 <h3 id="2-FAIL-TestSnapshotUnreliableRecoverConcurrentPartition2C"><a href="#2-FAIL-TestSnapshotUnreliableRecoverConcurrentPartition2C" class="headerlink" title="2. FAIL: TestSnapshotUnreliableRecoverConcurrentPartition2C"></a>2. FAIL: TestSnapshotUnreliableRecoverConcurrentPartition2C</h3><p>没有任何错误提示.<br>看日志发现 leader 在不停地 send append.<br>debug 发现 first index 小于 truncated index 了, 怀疑 truncated index 或者 first index 的持久化有问题.<br>debug 发现 send snapshot 的逻辑有问题, 无法发送 snapshot.</p>
 <h3 id="3-FAIL-panic-runtime-error-slice-bounds-out-of-range-1186-384"><a href="#3-FAIL-panic-runtime-error-slice-bounds-out-of-range-1186-384" class="headerlink" title="3. FAIL: panic: runtime error: slice bounds out of range [1186:384]"></a>3. FAIL: panic: runtime error: slice bounds out of range [1186:384]</h3><p>更改 raft log 的 first index 时没有修改 entries 数组, 导致 从 entries 数组中取 entry 的逻辑出错.</p>
-<h3 id="4-panic-Key-not-found"><a href="#4-panic-Key-not-found" class="headerlink" title="4. panic: Key not found"></a>4. panic: Key not found</h3><p>leader 请求生成 snapshot 后分区恢复, 出现了新 leader, 新 leader 再次请求 snapshot 时便会触发这个问题.<br>apply snapshot 时使用 snapData 的 Region 后解决.</p>
-<h3 id="5-panic-request-timeout"><a href="#5-panic-request-timeout" class="headerlink" title="5. panic: request timeout"></a>5. panic: request timeout</h3><p>leader 一直在请求 snapshot, 随后就 timeout 了.<br>apply snapshot 时使用 snapData 的 Region 后解决.</p>
+<h3 id="4-panic-Key-not-found"><a href="#4-panic-Key-not-found" class="headerlink" title="4. panic: Key not found"></a>4. panic: Key not found</h3><p>leader 请求生成 snapshot 后分区恢复, 出现了新 leader, 新 leader 再次请求 snapshot 时便会触发这个问题.<br>apply snapshot 时 WriteRegionState 后解决.</p>
+<h3 id="5-panic-request-timeout"><a href="#5-panic-request-timeout" class="headerlink" title="5. panic: request timeout"></a>5. panic: request timeout</h3><p>leader 一直在请求 snapshot, 随后就 timeout 了.<br>apply snapshot 时 WriteRegionState 后解决.</p>
 
 </div>
   </div>
@@ -2517,7 +2517,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-03-03T15:45:00+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-03-03T16:43:42+08:00">
   <a class='notlink' href="/" onclick="return false;" title="Click me!" >
     <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
     <p>更新于：2022年3月3日</p>
@@ -2823,8 +2823,8 @@ Peer: tinykv-server ...</p>
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646293509445')
-      volantis.js('/js/message.js?time=1646293509445', () => {
+      volantis.css('/css/message.css?time=1646297030158')
+      volantis.js('/js/message.js?time=1646297030159', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2869,8 +2869,8 @@ Peer: tinykv-server ...</p>
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646293509445')
-      volantis.js('/js/message.js?time=1646293509445', () => {
+      volantis.css('/css/message.css?time=1646297030158')
+      volantis.js('/js/message.js?time=1646297030159', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2929,8 +2929,8 @@ Peer: tinykv-server ...</p>
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646293509445')
-      volantis.js('/js/message.js?time=1646293509445', () => {
+      volantis.css('/css/message.css?time=1646297030158')
+      volantis.js('/js/message.js?time=1646297030159', () => {
         hideMessage(done);
       });
     } else {
@@ -3148,7 +3148,7 @@ Peer: tinykv-server ...</p>
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1646293509445')
+    volantis.js('/js/rightMenu.js?time=1646297030159')
   </script>
 
 
@@ -3162,19 +3162,19 @@ Peer: tinykv-server ...</p>
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1646293509445")
+        volantis.js("/js/plugins/sites.js?time=1646297030159")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1646293509445")
+        volantis.js("/js/plugins/friends.js?time=1646297030159")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1646293509445")
+        volantis.js("/js/plugins/contributors.js?time=1646297030159")
       }
     
   };
@@ -3290,7 +3290,7 @@ Peer: tinykv-server ...</p>
 
 
 
-<script src="/js/app.js?time=1646293509445.js"></script>
+<script src="/js/app.js?time=1646297030159.js"></script>
 
 
 <!-- optional -->
@@ -3411,7 +3411,7 @@ Peer: tinykv-server ...</p>
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1646293509445').then(()=>{
+    volantis.js('/js/parallax.js?time=1646297030159').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3605,7 +3605,7 @@ Peer: tinykv-server ...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/","name":"tinykv-project2-RaftKV-PartC"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartC","description":"tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.","datePublished":"2022-02-24T01:48:10.000Z","dateModified":"2022-03-03T07:45:00.880Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/","wordCount":43,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/","name":"tinykv-project2-RaftKV-PartC"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartC","description":"tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.","datePublished":"2022-02-24T01:48:10.000Z","dateModified":"2022-03-03T08:43:42.840Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/","wordCount":43,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->
