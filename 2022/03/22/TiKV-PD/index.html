@@ -4,8 +4,8 @@
   <meta name="generator" content="Hexo 5.4.0">
   <meta charset="utf-8">
   <!-- SEO相关 -->
-  <meta name="robots" content="noindex,follow">
-  <link rel="canonical" href="http://example.com/tags/tinykv/"/>
+  
+  <link rel="canonical" href="http://example.com/2022/03/22/tikv-pd/"/>
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
@@ -20,20 +20,25 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1650028057372" as="style">
+  <link rel="preload" href="/css/style.css?time=1650028057282" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
   <!-- 页面元数据 -->
-  <title>标签：tinykv - Moonm3n's blog</title>
-  <meta name="keywords" content="null">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Moonm3n&#39;s blog">
-<meta property="og:url" content="http://example.com/tags/tinykv/index.html">
+  <title>TiDB-PD - Moonm3n's blog</title>
+  <meta name="keywords" content="TiDB,null">
+  <meta name="description" content="PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TiDB-PD">
+<meta property="og:url" content="http://example.com/2022/03/22/TiKV-PD/index.html">
 <meta property="og:site_name" content="Moonm3n&#39;s blog">
+<meta property="og:description" content="PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
+<meta property="article:published_time" content="2022-03-22T06:45:27.000Z">
+<meta property="article:modified_time" content="2022-03-28T10:58:04.575Z">
 <meta property="article:author" content="Yueyang Zhan">
+<meta property="article:tag" content="TiDB">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
   <!-- feed -->
@@ -1623,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1650028057372" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057372"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650028057282" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057282"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2313,7 +2318,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   
     
       <!-- see: /layout/_partial/scripts/_ctrl/coverCtrl.ejs -->
-      <div id="none" class='cover-wrapper  dock' style="display: none;">
+      <div id="none" class='cover-wrapper post dock' style="display: none;">
         
   <div id="parallax-window"></div>
 
@@ -2387,328 +2392,267 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="safearea">
         <div class="body-wrapper">
           
-
 <div id="l_main" class=''>
-  
-    
-      
-  <section class="post-list">
-    
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-    
-    
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/">
+  <article itemscope itemtype="http://schema.org/Article" class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
+  <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/22/TiKV-PD/">
   <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
     <meta itemprop="name" content="Moonm3n's blog">
   </span>
   
-  
+
+
   
     <span hidden>
       <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
     </span>
   
+  <div class="article-meta" id="top">
+    
+    
+    
+      <h1 class="title" itemprop="name headline">
+        TiDB-PD
+      </h1>
+      <div class='new-meta-box'>
+        
+          
+            
+<div class='new-meta-item author' itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <a itemprop="url" class='author' href="/" rel="nofollow">
+    <img itemprop="image" src="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" class="lazyload" data-srcset="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+    <p itemprop="name">yueyang</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class='new-meta-item category'>
+    <i class="fas fa-folder-open fa-fw" aria-hidden="true"></i>
+    <a class="category-link" href="/categories/databases/">databases</a>
+    
+      <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
+        <a href="/categories/databases/" itemprop="url"><span itemprop="name">databases</span></a>
+      </span>
+    
+  </div>
+
+
+          
+        
+          
+            <div class="new-meta-item date" itemprop="dateCreated datePublished" datetime="2022-03-22T14:45:27+08:00">
+  <a class='notlink' href="/" onclick="return false;" title="Click me!" >
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：2022年3月22日</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+
+          
+        
+        <!-- Custom Files topMeta begin-->
+        
+        <!-- Custom Files topMeta end-->
+      </div>
+    
+  </div>
+
+
+  <div id="layoutHelper-page-plugins"></div>
+  <div id="post-body" itemprop="articleBody">
+    <p>PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.</p>
+<span id="more"></span>
+
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><div class="story post-story"><p>PD 是一个逻辑上的单点, 物理上是一个集群, 集成 etcd, 支持故障恢复, 保证了强一致性.<br>PD 功能可以分为三类:</p>
+<ol>
+<li>路由</li>
+<li>元数据管理</li>
+<li>调度</li>
+</ol>
+<p>TiKV 中的 Region Leader 与 Store 会定期向 PD 发送 Heartbeat, Heartbeat 中包含了 Region 和 Store 的各种状态信息,<br>PD 根据状态信息来调度 TiKV 集群的负载均衡, 将 Operator 通过 Heartbeat response 回复给 TiKV.</p>
+</div><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><div class="story post-story"><h3 id="1-Scheduler"><a href="#1-Scheduler" class="headerlink" title="1. Scheduler"></a>1. Scheduler</h3><p>Scheduler 是用来调度资源的接口, 调度器通过状态信息生成 Operator.</p>
+<h3 id="2-Operator"><a href="#2-Operator" class="headerlink" title="2. Operator"></a>2. Operator</h3><p>Operator 是 PD 对 TiKV 的调度操作的集合, 可以由其他 Operator 组合而成.</p>
+<h3 id="Selector-Filter"><a href="#Selector-Filter" class="headerlink" title="Selector/Filter"></a>Selector/Filter</h3><p>Selector 与 Filter 负责选择调度操作的 source 与 target.</p>
+<h3 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h3><p>Controller 负责控制整个调度的速度.</p>
+<h3 id="Coordinator"><a href="#Coordinator" class="headerlink" title="Coordinator"></a>Coordinator</h3><p>Coordinator 在 Region Heartbeat 会检测 Region 是否需要调度, 如果需要, 则进行调度.</p>
+<p>PD 中有许多调度器, 每个调度器是独立运行的, 有着不同的调度目的.<br>常见的调度器有:</p>
+<ul>
+<li>balance-leader-scheduler: 保持不同节点的 Leader 均衡.</li>
+<li>balance-region-scheduler: 保持不同节点的 Region 均衡.</li>
+<li>hot-region-scheduler: 保持不同节点的读写热点 Region 均衡.</li>
+<li>evict-leader-{store-id}: 驱逐某个节点的所有 Leader.</li>
+</ul>
+</div><h2 id="调度流程"><a href="#调度流程" class="headerlink" title="调度流程"></a>调度流程</h2><div class="story post-story"><p>调度的流程大体上可以分为三部分:</p>
+<ol>
+<li><p>信息收集<br>Region Leader 周期性地上报 RegionHeartbeat 心跳, 包含了 Region 范围, 副本分布, 副本状态, 数据量, 读写流量等数据.<br>Store 周期性地上报 StoreHeartbeat 心跳, 包含了 Store 的基本信息, 容量, 剩余空间, 读写流量等数据.</p>
+</li>
+<li><p>生成调度</p>
+</li>
+<li><p>执行调度<br>将 Operator Step 下发给对应 Region 的 Leader.</p>
+</li>
+</ol>
+<p>集群的元信息、TSO 信息、Region 信息 持久化在 etcd 中.<br>Store 与 Region 的状态存在 cache 中.</p>
+
+</div>
+  </div>
+  
   
     
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/03/05/tinykv-project3-MultiRaftKV-PartB/"  itemprop="url">
-        tinykv-project3-MultiRaftKV-PartB
-      </a>
-    </h2>
+    <div class='footer'>
+      
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2022/03/22/TiKV-PD/>http://example.com/2022/03/22/TiKV-PD/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
+    </div>
   
-  <div class='md' itemprop="articleBody">
+  
     
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
       
         
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-03-28T18:58:04+08:00">
+  <a class='notlink' href="/" onclick="return false;" title="Click me!" >
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：2022年3月28日</p>
+  </a>
+</div>
+
+        
+      
+        
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/TiDB/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>TiDB</p></a></div>
+  <span hidden itemprop="keywords">TiDB</span>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2022/03/22/TiKV-PD/&title=TiDB-PD - Moonm3n's blog&summary=PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度."
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2022/03/22/TiKV-PD/&title=TiDB-PD - Moonm3n's blog&summary=PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度."
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2022/03/22/TiKV-PD/&title=TiDB-PD - Moonm3n's blog&summary=PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度."
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+    <!-- Custom Files bottomMeta begin -->
+    
+    <!-- Custom Files bottomMeta end -->
+  </div>
+
+
+  
+  
+
+  
+    <div class="prev-next">
+      
+      
+        <a class='next' href='/2022/03/05/tinykv-project3-MultiRaftKV-PartB/'>
+          <p class='title'>tinykv-project3-MultiRaftKV-PartB<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'>
 
 summary3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split).
-transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 respon...
-      
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-03-05T20:52:50+08:00">2022-03-05</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/03/05/tinykv-project3-MultiRaftKV-PartB/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
+transfer l...</p>
+        </a>
       
     </div>
   
+  <!-- Custom Files postEnd begin-->
+  
+  <!-- Custom Files postEnd end-->
+</article>
 
-</div>
 
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
   
+
   
-  
+  <article class="post white-box reveal shadow" id="comments">
     <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
+      <meta itemprop="discussionUrl" content="/2022/03/22/TiKV-PD/index.html#comments">
     </span>
-  
-  
+    <p ct><i class='fas fa-comments'></i> 评论</p>
     
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/02/24/tinykv-project2-RaftKV-PartC/"  itemprop="url">
-        tinykv-project2-RaftKV-PartC
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
     
-      <p>tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-02-24T09:48:10+08:00">2022-02-24</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/02/24/tinykv-project2-RaftKV-PartC/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
+    <div id="layoutHelper-comments"></div>
 
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/02/03/tinykv-project2-RaftKV-PartB/"  itemprop="url">
-        tinykv-project2-RaftKV-PartB
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-02-03T17:56:59+08:00">2022-02-03</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/02/03/tinykv-project2-RaftKV-PartB/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/01/17/tinykv-project2-RaftKV-PartA/"  itemprop="url">
-        tinykv-project2-RaftKV-PartA
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 2 part a, 实现基本的 Raft 算法.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-01-17T15:30:04+08:00">2022-01-17</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/01/17/tinykv-project2-RaftKV-PartA/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/16/tinykv-project1-StandaloneKV/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/01/16/tinykv-project1-StandaloneKV/"  itemprop="url">
-        tinykv-project1-StandaloneKV
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-01-16T19:37:20+08:00">2022-01-16</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/01/16/tinykv-project1-StandaloneKV/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-    
-  </section>
-  
-    
+  </article>
   
 
 
-    
-  
+
+
+
 </div>
 <aside id='l_side' itemscope itemtype="http://schema.org/WPSideBar">
   
@@ -2716,143 +2660,34 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
     
 
-<section class="widget blogger shadow desktop pjax">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box circle' href='/about/'>
-          <img no-lazy src='https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg' alt="This is a picture without description" />
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Moonm3n</h2>
-        
-        
-          <p>Building Distributed Systems…</p>
 
-        
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="mailto:me@xxx.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/Moonm3n/"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop pjax">
+  <section class="widget toc-wrapper shadow desktop mobile pjax" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/database-course/" href="/categories/database-course/"
-            active-action="action-categoriesdatabase-course"
-            ><div class='name'>database course</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/database-project/" href="/categories/database-project/"
-            active-action="action-categoriesdatabase-project"
-            ><div class='name'>database project</div><div class='badge'>(5)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/databases/" href="/categories/databases/"
-            active-action="action-categoriesdatabases"
-            ><div class='name'>databases</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/paper/" href="/categories/paper/"
-            active-action="action-categoriespaper"
-            ><div class='name'>paper</div><div class='badge'>(4)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">实现原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Scheduler"><span class="toc-text">1. Scheduler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Operator"><span class="toc-text">2. Operator</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Selector-Filter"><span class="toc-text">Selector&#x2F;Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Controller"><span class="toc-text">Controller</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Coordinator"><span class="toc-text">Coordinator</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E5%BA%A6%E6%B5%81%E7%A8%8B"><span class="toc-text">调度流程</span></a></li></ol>
     </div>
   </section>
-
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile pjax">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/Raft/" style="font-size: 14px; color: #999">Raft</a> <a href="/tags/TiDB/" style="font-size: 14px; color: #999">TiDB</a> <a href="/tags/cmu-15-445/" style="font-size: 14px; color: #999">cmu 15-445</a> <a href="/tags/tinykv/" style="font-size: 24px; color: #555">tinykv</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 <!-- 没有 pjax 占位会报错 万恶的 pjax -->
+
+  <div class="pjax">
+    <!-- pjax占位 -->
+  </div>
+
+  <div class="pjax">
+    <!-- pjax占位 -->
+  </div>
 
   <div class="pjax">
     <!-- pjax占位 -->
@@ -2881,14 +2716,15 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 </aside>
 
 
+
           <!--此文件用来存放一些不方便取值的变量-->
 <!--思路大概是将值藏到重加载的区域内-->
 
 <pjax>
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="TiDB-PD";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   pdata.commentConfig={};
@@ -3002,8 +2838,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057281')
+      volantis.js('/js/message.js?time=1650028057282', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -3048,8 +2884,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057281')
+      volantis.js('/js/message.js?time=1650028057282', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -3108,8 +2944,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057281')
+      volantis.js('/js/message.js?time=1650028057282', () => {
         hideMessage(done);
       });
     } else {
@@ -3327,7 +3163,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1650028057372')
+    volantis.js('/js/rightMenu.js?time=1650028057281')
   </script>
 
 
@@ -3341,19 +3177,19 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1650028057372")
+        volantis.js("/js/plugins/sites.js?time=1650028057282")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1650028057372")
+        volantis.js("/js/plugins/friends.js?time=1650028057282")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1650028057372")
+        volantis.js("/js/plugins/contributors.js?time=1650028057282")
       }
     
   };
@@ -3469,7 +3305,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
 
 
-<script src="/js/app.js?time=1650028057372.js"></script>
+<script src="/js/app.js?time=1650028057282.js"></script>
 
 
 <!-- optional -->
@@ -3590,7 +3426,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1650028057372').then(()=>{
+    volantis.js('/js/parallax.js?time=1650028057282').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3784,7 +3620,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/tags/tinykv/","name":"tinykv"}}]},{"@context":"http://schema.org","@type":"WebSite","name":"Moonm3n's blog","url":"http://example.com/","keywords":null,"description":"","author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","description":""},"publisher":{"@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"potentialAction":{"@type":"SearchAction","name":"Site Search","target":{"@type":"EntryPoint","urlTemplate":"http://example.com?s={search_term_string}"},"query-input":"required name=search_term_string"}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/databases/","name":"databases"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/03/22/TiKV-PD/","name":"TiDB-PD"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TiDB-PD","description":"PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.","datePublished":"2022-03-22T06:45:27.000Z","dateModified":"2022-03-28T10:58:04.575Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/03/22/TiKV-PD/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/03/22/TiKV-PD/","wordCount":51,"articleSection":"databases","keywords":"TiDB","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->

@@ -20,7 +20,7 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1646297030166" as="style">
+  <link rel="preload" href="/css/style.css?time=1650028057291" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
@@ -36,7 +36,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-02-03T09:56:59.000Z">
-<meta property="article:modified_time" content="2022-02-24T09:20:24.296Z">
+<meta property="article:modified_time" content="2022-04-06T14:02:46.678Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="tinykv">
 <meta name="twitter:card" content="summary">
@@ -1628,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1646297030166" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1646297030166"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650028057291" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057291"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2469,12 +2469,23 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <p>tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.</p>
 <span id="more"></span>
 
+<h2 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h2><div class="story post-story"><p>在 Project2 Part A 中我们实现了 Raft 算法的 Leader election 和 Log replication 部分. 也实现了 Ready 相关的几个函数, 能够抽取 Raft 层的变更信息. 整个 2A 的主要工作都是在 Raft 层. 在 Project2 Part B 中, 我们把 KV 存储引擎用作 Raft 中的状态机, 将 Client 的请求作为日志, 扩展出一个容错的 KV 存储服务.</p>
+<p>首先需要了解几个基本的概念:</p>
 <ul>
-<li>Store: 一个 tinykv-server</li>
-<li>Peer: tinykv-server 中运行的一个 raft node</li>
-<li>Region: Peer 的集合, 即一个 Raft group</li>
+<li>Store: 一个 tinykv-server.</li>
+<li>Peer: tinykv-server 中运行的一个 Raft node, 一个 Store 上可能运行有多个 Peer, 每个 Peer 所属于不同的 Region, 在 2B 中, 只会涉及到一个 Region.</li>
+<li>Region: Raft group.</li>
 </ul>
-<h2 id="peer-storage"><a href="#peer-storage" class="headerlink" title="peer storage"></a>peer storage</h2><div class="story post-story"><h2 id="raft-ready-process"><a href="#raft-ready-process" class="headerlink" title="raft ready process"></a>raft ready process</h2><p>HandleRaftReady</p>
+</div><h2 id="Implement-peer-storage"><a href="#Implement-peer-storage" class="headerlink" title="Implement peer storage"></a>Implement peer storage</h2><div class="story post-story"><p>在这一步中, 我们需要将 Raft 层的状态持久化. </p>
+<p>Raft 论文中提到的需要持久化的状态有:</p>
+<ol>
+<li>currentTerm: 节点当前的任期, 既 HardState 中的 Term. </li>
+<li>votedFor: 节点给谁投了票, 既 HardState 中的 Vote. 如果不持久化 Vote, 节点投票后重启会产生一个节点在一个 Term 中投出两张票的现象.</li>
+<li>log[]: 节点当前的日志.</li>
+</ol>
+<p>与 Raft 论文不同, tinykv 中还需要将 Commit 和 Region 信息持久化. tinykv 中的绝大多数 request 都是幂等的.</p>
+<p>具体到代码中, 我们需要实现 SaveReadyState() 与 Append() 两个函数, 2B 中并不涉及快照, ApplySnapshot() 函数暂时不需要实现.</p>
+</div><h2 id="Implement-Raft-ready-process"><a href="#Implement-Raft-ready-process" class="headerlink" title="Implement Raft ready process"></a>Implement Raft ready process</h2><div class="story post-story"><p>HandleRaftReady</p>
 <ol>
 <li>get the ready from Raft module.</li>
 <li>persisting log entries.</li>
@@ -2484,13 +2495,11 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 </div><h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><div class="story post-story"><h3 id="1-panic-find-no-region-for-30203030303030303030"><a href="#1-panic-find-no-region-for-30203030303030303030" class="headerlink" title="1. panic: find no region for 30203030303030303030"></a>1. panic: find no region for 30203030303030303030</h3><p>raft.go newRaft()<br>优先使用 storage 中的 confState.Nodes 的值.</p>
 <h3 id="2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1"><a href="#2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1" class="headerlink" title="2. panic: runtime error: index out of range [18446744073709551611] with length 1"></a>2. panic: runtime error: index out of range [18446744073709551611] with length 1</h3><p>raft.go sendAppend()<br>index 处理有问题</p>
 <h3 id="3-空指针"><a href="#3-空指针" class="headerlink" title="3. 空指针"></a>3. 空指针</h3><p>snap 的 response 需要携带 Region, cd 的 Txn 需要赋值, 否则会出现空指针异常.</p>
-<h3 id="4-can’t-call-command-header-on-leader-n"><a href="#4-can’t-call-command-header-on-leader-n" class="headerlink" title="4. can’t call command header on leader n"></a>4. can’t call command header on leader n</h3><p>WaitRespWithTimeout 超时了.</p>
-<!-- router.peerSender 管道满了 -->
-<p>不停地向 router.peerSender 中发送消息, 导致管道堵塞, 引发卡死.<br>Ready() 函数里没有清空 msg.</p>
+<h3 id="4-can’t-call-command-header-on-leader-n"><a href="#4-can’t-call-command-header-on-leader-n" class="headerlink" title="4. can’t call command header on leader n"></a>4. can’t call command header on leader n</h3><p>WaitRespWithTimeout 超时了.<br>router.peerSender 管道满了<br>不停地向 router.peerSender 中发送消息, 导致管道堵塞, 引发卡死.<br>Ready() 函数里没有清空 msg.</p>
 <h3 id="5-panic-region-1-2-unexpected-raft-log-index"><a href="#5-panic-region-1-2-unexpected-raft-log-index" class="headerlink" title="5. panic: [region 1] 2 unexpected raft log index"></a>5. panic: [region 1] 2 unexpected raft log index</h3><p>— FAIL: TestPersistPartition2B (27.40s)<br>panic: [region 1] 2 unexpected raft log index: lastIndex 33539 &lt; appliedIndex 33810 [recovered]</p>
 <p>看起来像是 lastIndex 持久化的逻辑有问题, 重启节点时监测到 lastIndex 比 appliedIndex 更小, 引发 panic.<br>修改了持久化的逻辑后变成了偶现 bug, 1% 几率出现. 修复问题 6 后消失.</p>
 <h3 id="6-panic-runtime-error-index-out-of-range-1091-with-length-1087"><a href="#6-panic-runtime-error-index-out-of-range-1091-with-length-1087" class="headerlink" title="6. panic: runtime error: index out of range [1091] with length 1087"></a>6. panic: runtime error: index out of range [1091] with length 1087</h3><p>偶现 bug, 3% 几率出现.<br>bug 出现时, 这两个 index 的差值绝大多数时候为 5, length 为 1087 时, 最后一个元素应该是 [1086].<br>看了日志, 在 partition 情况下才会发生. leader progress 里存储的 next 比自身的 lastIndex 大了更多.<br>加日志后实锤, append entries 返回了大于 leader.lastIndex 的 index, leader 用这个 index 更新了 next,<br>于是出现了数组越界.</p>
-<p>错误原因:<br>becomeFollower 时将 Vote 设置为了 None, partition 后有可能选出两个</p>
+<p>错误原因:<br>becomeFollower 时将 Vote 设置为了 None, partition 后有可能选出两个 Leader.</p>
 <h3 id="7-panic-len-resp-Responses-1"><a href="#7-panic-len-resp-Responses-1" class="headerlink" title="7. panic: len(resp.Responses) != 1"></a>7. panic: len(resp.Responses) != 1</h3><p>偶现 bug, 1% 几率出现.<br>panic: len(resp.Responses) != 1</p>
 <p>goroutine 439 [running]:<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPutCF(0xc00011f5c0, 0x47f01a0, 0x7, 0xc22a37f5d0, 0xa, 0x10, 0xc22a37f5e0, 0x9, 0x10)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:308 +0x24d<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPut(…)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:298<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.GenericTest.func1(0x1, 0xc000001e00)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:211 +0x41f<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.runClient(0xc000001e00, 0x1, 0xc21c12fb60, 0xc21e28acf0)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:27 +0x7a<br>created by github.com/pingcap-incubator/tinykv/kv/test_raftstore.SpawnClientsAndWait<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:37 +0xb2<br>FAIL    github.com/pingcap-incubator/tinykv/kv/test_raftstore    23.630s<br>FAIL<br>rm -rf /tmp/<em>test-raftstore</em></p>
 <p>修复问题 6 后消失.</p>
@@ -2530,10 +2539,10 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-02-24T17:20:24+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-06T22:02:46+08:00">
   <a class='notlink' href="/" onclick="return false;" title="Click me!" >
     <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
-    <p>更新于：2022年2月24日</p>
+    <p>更新于：2022年4月6日</p>
   </a>
 </div>
 
@@ -2681,7 +2690,7 @@ follow 在...</p>
 
 
     <div class='content'>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#peer-storage"><span class="toc-text">peer storage</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#raft-ready-process"><span class="toc-text">raft ready process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="toc-text">问题记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-panic-find-no-region-for-30203030303030303030"><span class="toc-text">1. panic: find no region for 30203030303030303030</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1"><span class="toc-text">2. panic: runtime error: index out of range [18446744073709551611] with length 1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%A9%BA%E6%8C%87%E9%92%88"><span class="toc-text">3. 空指针</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-can%E2%80%99t-call-command-header-on-leader-n"><span class="toc-text">4. can’t call command header on leader n</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-panic-region-1-2-unexpected-raft-log-index"><span class="toc-text">5. panic: [region 1] 2 unexpected raft log index</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-panic-runtime-error-index-out-of-range-1091-with-length-1087"><span class="toc-text">6. panic: runtime error: index out of range [1091] with length 1087</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-panic-len-resp-Responses-1"><span class="toc-text">7. panic: len(resp.Responses) !&#x3D; 1</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Basic"><span class="toc-text">Basic</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implement-peer-storage"><span class="toc-text">Implement peer storage</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implement-Raft-ready-process"><span class="toc-text">Implement Raft ready process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="toc-text">问题记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-panic-find-no-region-for-30203030303030303030"><span class="toc-text">1. panic: find no region for 30203030303030303030</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1"><span class="toc-text">2. panic: runtime error: index out of range [18446744073709551611] with length 1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%A9%BA%E6%8C%87%E9%92%88"><span class="toc-text">3. 空指针</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-can%E2%80%99t-call-command-header-on-leader-n"><span class="toc-text">4. can’t call command header on leader n</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-panic-region-1-2-unexpected-raft-log-index"><span class="toc-text">5. panic: [region 1] 2 unexpected raft log index</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-panic-runtime-error-index-out-of-range-1091-with-length-1087"><span class="toc-text">6. panic: runtime error: index out of range [1091] with length 1087</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-panic-len-resp-Responses-1"><span class="toc-text">7. panic: len(resp.Responses) !&#x3D; 1</span></a></li></ol></li></ol>
     </div>
   </section>
 
@@ -2847,8 +2856,8 @@ follow 在...</p>
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030166')
-      volantis.js('/js/message.js?time=1646297030166', () => {
+      volantis.css('/css/message.css?time=1650028057291')
+      volantis.js('/js/message.js?time=1650028057291', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2893,8 +2902,8 @@ follow 在...</p>
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030166')
-      volantis.js('/js/message.js?time=1646297030166', () => {
+      volantis.css('/css/message.css?time=1650028057291')
+      volantis.js('/js/message.js?time=1650028057291', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2953,8 +2962,8 @@ follow 在...</p>
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030166')
-      volantis.js('/js/message.js?time=1646297030166', () => {
+      volantis.css('/css/message.css?time=1650028057291')
+      volantis.js('/js/message.js?time=1650028057291', () => {
         hideMessage(done);
       });
     } else {
@@ -3172,7 +3181,7 @@ follow 在...</p>
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1646297030166')
+    volantis.js('/js/rightMenu.js?time=1650028057291')
   </script>
 
 
@@ -3186,19 +3195,19 @@ follow 在...</p>
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1646297030166")
+        volantis.js("/js/plugins/sites.js?time=1650028057291")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1646297030166")
+        volantis.js("/js/plugins/friends.js?time=1650028057291")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1646297030166")
+        volantis.js("/js/plugins/contributors.js?time=1650028057291")
       }
     
   };
@@ -3314,7 +3323,7 @@ follow 在...</p>
 
 
 
-<script src="/js/app.js?time=1646297030166.js"></script>
+<script src="/js/app.js?time=1650028057291.js"></script>
 
 
 <!-- optional -->
@@ -3435,7 +3444,7 @@ follow 在...</p>
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1646297030166').then(()=>{
+    volantis.js('/js/parallax.js?time=1650028057291').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3629,7 +3638,7 @@ follow 在...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","name":"tinykv-project2-RaftKV-PartB"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartB","description":"tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.","datePublished":"2022-02-03T09:56:59.000Z","dateModified":"2022-02-24T09:20:24.296Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","wordCount":49,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","name":"tinykv-project2-RaftKV-PartB"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartB","description":"tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.","datePublished":"2022-02-03T09:56:59.000Z","dateModified":"2022-04-06T14:02:46.678Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/","wordCount":49,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->

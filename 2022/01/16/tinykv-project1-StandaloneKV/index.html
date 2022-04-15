@@ -20,7 +20,7 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1646297030170" as="style">
+  <link rel="preload" href="/css/style.css?time=1650028057297" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
@@ -36,7 +36,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-01-16T11:37:20.000Z">
-<meta property="article:modified_time" content="2022-01-17T07:13:44.400Z">
+<meta property="article:modified_time" content="2022-04-15T13:07:21.537Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="tinykv">
 <meta name="twitter:card" content="summary">
@@ -1628,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1646297030170" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1646297030170"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650028057297" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057297"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2468,29 +2468,35 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   <div id="post-body" itemprop="articleBody">
     <p>tinykv project 1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.</p>
 <span id="more"></span>
-<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><div class="story post-story"><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>基于 badger 构造一个单机的支持列族存储的 gRPC 服务.<br>这一服务提供四种基本操作: Put/Delete/Get/Scan.</p>
+
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><div class="story post-story"><p>基于 badger 构造一个单机的支持列族存储的 gRPC 服务.<br>这一服务提供四种基本操作: <code>Put</code>/<code>Delete</code>/<code>Get</code>/<code>Scan</code>.</p>
 <ul>
-<li>Put: 向指定列族中写入或修改.</li>
+<li>Put: 向指定列族中写入.</li>
 <li>Get: 从指定列族中读取.</li>
 <li>Delete: 删除指定列族的指定值.</li>
-<li>Scan: 从指定列族中读取多个值.</li>
+<li>Scan: 从指定列族中顺序读取多个值.</li>
 </ul>
-<h3 id="要求实现的接口"><a href="#要求实现的接口" class="headerlink" title="要求实现的接口"></a>要求实现的接口</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Storage <span class="keyword">interface</span> &#123;</span><br><span class="line">  Start() error</span><br><span class="line">  Stop() error</span><br><span class="line">  Write(ctx *kvrpcpb.Context, batch []Modify) error</span><br><span class="line">  Reader(ctx *kvrpcpb.Context) (StorageReader, error)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> StorageReader <span class="keyword">interface</span> &#123;</span><br><span class="line">  GetCF(cf <span class="keyword">string</span>, key []<span class="keyword">byte</span>) ([]<span class="keyword">byte</span>, error)</span><br><span class="line">  IterCf(cf <span class="keyword">string</span>) engine_util.DBIterator</span><br><span class="line">  Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Storage 的 Write 方法接收一个 Context 指针 ctx 和一个 Modify 数组<br>batch.Modify 是 interface{} 的一个简单封装, 而 Context 可暂时不管, 在后续项目中才会用到.</p>
-<p>官方给的几个提示:</p>
-<ol>
-<li>Reader() 方法需要使用 badger.Txn, Reader close 时先将所有 iterator close, 再调用 txn.Discard().</li>
-<li>Badger 不提供对列族的支持, engine_util package (kv/util/engine_util) 包通过向 key 添加前缀的方式支持列族.</li>
-</ol>
-<p>storage 有三个实现类: MemStorage, RaftStorage, StandAloneStorage.</p>
+</div><h2 id="Implement-standalone-storage-engine"><a href="#Implement-standalone-storage-engine" class="headerlink" title="Implement standalone storage engine"></a>Implement standalone storage engine</h2><div class="story post-story"><h3 id="题目解析"><a href="#题目解析" class="headerlink" title="题目解析"></a>题目解析</h3><p>在这一步中我们要实现 Storage 接口的一个实现类 StandAloneStorage, 在 TinyKV 中, Storage 接口有三个实现类: MemStorage, RaftStorage 和 StandAloneStorage.</p>
+<h4 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h4><p>Storage 可以理解为存储层的抽象, 提供 <code>Start()</code>, <code>Stop()</code>, <code>Write()</code>, <code>Reader()</code> 四种方法.</p>
 <ul>
-<li>MemStorage:<br>不需要 Start() 与 Stop(), 一个 llrb.LLRB 便是一个 CF, 只需要调用 llrb.LLRB 的 ReplaceOrInsert(item)、Delete(item)、Get(item) 等方法即可.</li>
-<li>RaftStorage:<br>Start() 时根据 config 新建一些 client 与 worker 并启动, Stop() 时将它们停止.<br>Write() 先将 batch 进行解析, 再调用 raftRouter.SendRaftCommand(request, cb) 将消息发向 raft 集群.</li>
-<li>StandAloneStorage:<br>要求实现的部分, 类比 RaftStorage 即可.</li>
+<li><code>Start()</code> 与 <code>Stop()</code> 方法只有 RaftStorage 类会用到, 用于启动/停止底层 Raft 节点, 题目中也没有要求我们实现这两个方法. ( 感觉 <code>Start()</code> 与 <code>Stop()</code> 方法中的两行 <code>// Your Code Here (1).</code> 应该删掉 )</li>
+<li><code>Write()</code> 方法向存储层中写入变更, 变更的类型可以是 Put 或 Delete.</li>
+<li><code>Reader()</code> 方法返回一个 StorageReader 类, 提供 <code>GetCF()</code>, <code>IterCF()</code>, <code>Close()</code> 三种方法.<br>总的来说, Storage 提供 <code>Write()</code>, <code>GetCF()</code> 和 <code>IterCF()</code> 三种操作数据的方法.</li>
 </ul>
+<h5 id="MemStorage"><a href="#MemStorage" class="headerlink" title="MemStorage"></a>MemStorage</h5><p>MemStorage 是 Storage 的纯内存实现, 硬编码了三个列族: CfDefault, CfLock 和 CfWrite. 每个列族是一颗红黑树,<br><code>Write()</code>, <code>GetCF()</code>, <code>IterCF()</code> 直接调用了红黑树的 <code>ReplaceOrInsert(item)</code>、<code>Delete(item)</code>、<code>Get(item)</code> 方法.</p>
+<p>Project 4 测试时使用的 Storage 便是 MemStorage.</p>
+<h5 id="RaftStorage"><a href="#RaftStorage" class="headerlink" title="RaftStorage"></a>RaftStorage</h5><p>RaftStorage 是 Storage 的分布式实现. 当我们 Run TinyKV with TinySQL 时, 默认会使用这个 Storage.</p>
+<h5 id="StandAloneStorage"><a href="#StandAloneStorage" class="headerlink" title="StandAloneStorage"></a>StandAloneStorage</h5><p>StandAloneStorage 是 Storage 的单机实现, 我们要实现的便是这它.</p>
+<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><p>看了题目之后一脸懵逼, 还好 Storage 接口还有其他两个实现类 MemStorage 与 RaftStorage.</p>
+<p>读了读它们的代码, 题目中要求基于 badger key/value API, 而 MemStorage 使用的是红黑树, 只能参考一下 <code>Write()</code> 时处理 <code>Modify</code> 的方法, 其他部分没有参考价值.<br>还剩下 RaftStorage , RaftStorage <code>Start()</code> 时根据 config 新建了一些 client 和 worker 并启动, <code>Stop()</code> 时将它们停止.<br><code>Write()</code> 时, RaftStorage 将 <code>Modify</code> 转换为 <code>Put</code> 或 <code>Delete</code>, 然后将它们打包成 request 发送到 Raft 层. 这里并没有写入 badger 相关的代码.<br><code>GetCF()</code> 时, RaftStorage 直接调用 <code>engine_util</code> 中的方法在 badger 中读取, <code>IterCF()</code> 也类似.<br>看了看 <code>engine_util</code> 中的方法, 原来题目中提到的 badger 的操作都在这, 接下来怎么写就比较清晰了.</p>
+<p>StandAloneStorage 的 <code>Write()</code> 方法只要将 <code>Modify</code> 解析为 <code>Put</code> 或 <code>Delete</code>, 再调用 <code>engine_util</code> 中的方法写入或删除就可以了.<br><code>Reader()</code> 方法只要新建一个事务, 再新建一个类似 <code>RegionReader</code> 的 Reader 即可.<br>Reader <code>Close()</code> 时记得调用 <code>Discard()</code> 方法结束事务.</p>
+</div><h2 id="Implement-service-handlers"><a href="#Implement-service-handlers" class="headerlink" title="Implement service handlers"></a>Implement service handlers</h2><div class="story post-story"><h3 id="题目解析-1"><a href="#题目解析-1" class="headerlink" title="题目解析"></a>题目解析</h3><p>在上一步我们实现了 StandAloneStorage, 但它的接口和题目中咱们的最终目标 <code>Put</code>/<code>Delete</code>/<code>Get</code>/<code>Scan</code> 还不太一样,<br>在这一步中我们要利用 StandAloneStorage 实现 <code>RawPut</code>/<code>RawDelete</code>/<code>RawGet</code>/<code>RawScan</code> 这四个方法, 处理 request, 返回对应的 response.</p>
+<h3 id="实现思路-1"><a href="#实现思路-1" class="headerlink" title="实现思路"></a>实现思路</h3><p>要实现的四个方法属于 Server 这个类, Server 类中正好有 Storage 这一属性, 这算是衔接上了.<br>Region 是 Multi-Raft 中的一个概念, 在这一步中我们还没有涉及到 Raft, 不知道为什么类似 <code>RawGetResponse</code> 这样的类中会有 <code>RegionError</code> 这样的属性, 还是先忽略吧.</p>
+<h4 id="RawGet"><a href="#RawGet" class="headerlink" title="RawGet"></a>RawGet</h4><p>从 Storage 中获取 Reader, 再调用 Reader 的 <code>GetCF</code> 即可. 注意出错时要将错误信息赋值给 <code>response.Error</code>, 没找到结果时要将 <code>response.NotFound</code> 设置为 True.</p>
+<h4 id="RawPut-amp-RawDelete"><a href="#RawPut-amp-RawDelete" class="headerlink" title="RawPut &amp; RawDelete"></a>RawPut &amp; RawDelete</h4><p>先构建 <code>Modify</code>, 再调用 Storage 的 <code>Write</code> 方法即可.</p>
+<h4 id="RawScan"><a href="#RawScan" class="headerlink" title="RawScan"></a>RawScan</h4><p>从 Storage 中获取 Reader, 再从 Reader 中获取 Iter, Seek 到对应的 Key 读取最多 Limit 个值即可.</p>
 </div><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><div class="story post-story"><h3 id="在-macOS-上切换-go-版本"><a href="#在-macOS-上切换-go-版本" class="headerlink" title="在 macOS 上切换 go 版本"></a>在 macOS 上切换 go 版本</h3><p>用 1.17.5 版本的 go 运行 project 时会有奇怪的 error<br><code>fatal error: unexpected signal during runtime execution</code>.<br>看了一下 issues 应该是 go 版本的锅, 降级到 1.16.x 便可.</p>
-<p>在 macOS 中可以使用 brew 方便地管理版本.</p>
+<p>在 macOS 中使用 brew 可以方便地管理软件的版本.</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装 go</span></span><br><span class="line">brew install go</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装 go 1.16</span></span><br><span class="line">brew install go@1.16</span><br><span class="line"><span class="meta">#</span><span class="bash"> 切换到 go 1.16</span></span><br><span class="line">brew unlink go</span><br><span class="line">brew link go@1.16</span><br></pre></td></tr></table></figure>
 
 </div>
@@ -2528,10 +2534,10 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-01-17T15:13:44+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-15T21:07:21+08:00">
   <a class='notlink' href="/" onclick="return false;" title="Click me!" >
     <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
-    <p>更新于：2022年1月17日</p>
+    <p>更新于：2022年4月15日</p>
   </a>
 </div>
 
@@ -2671,7 +2677,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
     <div class='content'>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE"><span class="toc-text">题目</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E6%B1%82%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%8E%A5%E5%8F%A3"><span class="toc-text">要求实现的接口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-text">其他</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8-macOS-%E4%B8%8A%E5%88%87%E6%8D%A2-go-%E7%89%88%E6%9C%AC"><span class="toc-text">在 macOS 上切换 go 版本</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implement-standalone-storage-engine"><span class="toc-text">Implement standalone storage engine</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E6%9E%90"><span class="toc-text">题目解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Storage"><span class="toc-text">Storage</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#MemStorage"><span class="toc-text">MemStorage</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RaftStorage"><span class="toc-text">RaftStorage</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#StandAloneStorage"><span class="toc-text">StandAloneStorage</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-text">实现思路</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Implement-service-handlers"><span class="toc-text">Implement service handlers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E6%9E%90-1"><span class="toc-text">题目解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF-1"><span class="toc-text">实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#RawGet"><span class="toc-text">RawGet</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RawPut-amp-RawDelete"><span class="toc-text">RawPut &amp; RawDelete</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RawScan"><span class="toc-text">RawScan</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-text">其他</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8-macOS-%E4%B8%8A%E5%88%87%E6%8D%A2-go-%E7%89%88%E6%9C%AC"><span class="toc-text">在 macOS 上切换 go 版本</span></a></li></ol></li></ol>
     </div>
   </section>
 
@@ -2837,8 +2843,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030170')
-      volantis.js('/js/message.js?time=1646297030170', () => {
+      volantis.css('/css/message.css?time=1650028057297')
+      volantis.js('/js/message.js?time=1650028057297', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2883,8 +2889,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030170')
-      volantis.js('/js/message.js?time=1646297030170', () => {
+      volantis.css('/css/message.css?time=1650028057297')
+      volantis.js('/js/message.js?time=1650028057297', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2943,8 +2949,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1646297030170')
-      volantis.js('/js/message.js?time=1646297030170', () => {
+      volantis.css('/css/message.css?time=1650028057297')
+      volantis.js('/js/message.js?time=1650028057297', () => {
         hideMessage(done);
       });
     } else {
@@ -3162,7 +3168,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1646297030170')
+    volantis.js('/js/rightMenu.js?time=1650028057297')
   </script>
 
 
@@ -3176,19 +3182,19 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1646297030170")
+        volantis.js("/js/plugins/sites.js?time=1650028057297")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1646297030170")
+        volantis.js("/js/plugins/friends.js?time=1650028057297")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1646297030170")
+        volantis.js("/js/plugins/contributors.js?time=1650028057297")
       }
     
   };
@@ -3304,7 +3310,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
 
-<script src="/js/app.js?time=1646297030170.js"></script>
+<script src="/js/app.js?time=1650028057297.js"></script>
 
 
 <!-- optional -->
@@ -3425,7 +3431,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1646297030170').then(()=>{
+    volantis.js('/js/parallax.js?time=1650028057297').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3619,7 +3625,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/","name":"tinykv-project1-StandaloneKV"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project1-StandaloneKV","description":"tinykv project 1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.","datePublished":"2022-01-16T11:37:20.000Z","dateModified":"2022-01-17T07:13:44.400Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/","wordCount":51,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/","name":"tinykv-project1-StandaloneKV"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project1-StandaloneKV","description":"tinykv project 1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.","datePublished":"2022-01-16T11:37:20.000Z","dateModified":"2022-04-15T13:07:21.537Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/01/16/tinykv-project1-StandaloneKV/","wordCount":51,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->

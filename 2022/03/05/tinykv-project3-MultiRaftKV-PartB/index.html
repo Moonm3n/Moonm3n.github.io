@@ -4,8 +4,8 @@
   <meta name="generator" content="Hexo 5.4.0">
   <meta charset="utf-8">
   <!-- SEO相关 -->
-  <meta name="robots" content="noindex,follow">
-  <link rel="canonical" href="http://example.com/tags/tinykv/"/>
+  
+  <link rel="canonical" href="http://example.com/2022/03/05/tinykv-project3-multiraftkv-partb/"/>
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
@@ -20,20 +20,25 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1650028057372" as="style">
+  <link rel="preload" href="/css/style.css?time=1650028057287" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
   <!-- 页面元数据 -->
-  <title>标签：tinykv - Moonm3n's blog</title>
-  <meta name="keywords" content="null">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Moonm3n&#39;s blog">
-<meta property="og:url" content="http://example.com/tags/tinykv/index.html">
+  <title>tinykv-project3-MultiRaftKV-PartB - Moonm3n's blog</title>
+  <meta name="keywords" content="tinykv,null">
+  <meta name="description" content="summary3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split). transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 response">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tinykv-project3-MultiRaftKV-PartB">
+<meta property="og:url" content="http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/index.html">
 <meta property="og:site_name" content="Moonm3n&#39;s blog">
+<meta property="og:description" content="summary3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split). transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 response">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
+<meta property="article:published_time" content="2022-03-05T12:52:50.000Z">
+<meta property="article:modified_time" content="2022-04-10T06:30:01.057Z">
 <meta property="article:author" content="Yueyang Zhan">
+<meta property="article:tag" content="tinykv">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
   <!-- feed -->
@@ -1623,8 +1628,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1650028057372" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057372"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650028057287" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650028057287"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2313,7 +2318,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   
     
       <!-- see: /layout/_partial/scripts/_ctrl/coverCtrl.ejs -->
-      <div id="none" class='cover-wrapper  dock' style="display: none;">
+      <div id="none" class='cover-wrapper post dock' style="display: none;">
         
   <div id="parallax-window"></div>
 
@@ -2387,328 +2392,279 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="safearea">
         <div class="body-wrapper">
           
-
 <div id="l_main" class=''>
-  
-    
-      
-  <section class="post-list">
-    
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-    
-    
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
+  <article itemscope itemtype="http://schema.org/Article" class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/">
   <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
     <meta itemprop="name" content="Moonm3n's blog">
   </span>
   
-  
+
+
   
     <span hidden>
       <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
     </span>
   
-  
+  <div class="article-meta" id="top">
     
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/03/05/tinykv-project3-MultiRaftKV-PartB/"  itemprop="url">
+    
+    
+      <h1 class="title" itemprop="name headline">
         tinykv-project3-MultiRaftKV-PartB
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      
+      </h1>
+      <div class='new-meta-box'>
         
+          
+            
+<div class='new-meta-item author' itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <a itemprop="url" class='author' href="/" rel="nofollow">
+    <img itemprop="image" src="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" class="lazyload" data-srcset="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+    <p itemprop="name">yueyang</p>
+  </a>
+</div>
 
-summary3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split).
-transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 respon...
-      
+          
+        
+          
+            
+  <div class='new-meta-item category'>
+    <i class="fas fa-folder-open fa-fw" aria-hidden="true"></i>
+    <a class="category-link" href="/categories/database-project/">database project</a>
+    
+      <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
+        <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
+      </span>
     
   </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-03-05T20:52:50+08:00">2022-03-05</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
+
+
           
         
+          
+            <div class="new-meta-item date" itemprop="dateCreated datePublished" datetime="2022-03-05T20:52:50+08:00">
+  <a class='notlink' href="/" onclick="return false;" title="Click me!" >
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：2022年3月5日</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+
+          
+        
+        <!-- Custom Files topMeta begin-->
+        
+        <!-- Custom Files topMeta end-->
       </div>
+    
+  </div>
+
+
+  <div id="layoutHelper-page-plugins"></div>
+  <div id="post-body" itemprop="articleBody">
+    <span id="more"></span>
+
+<h2 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h2><div class="story post-story"><p>3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split).</p>
+</div><h2 id="transfer-leader"><a href="#transfer-leader" class="headerlink" title="transfer leader"></a>transfer leader</h2><div class="story post-story"><p>transfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,<br>peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 response 即可.</p>
+</div><h2 id="conf-change"><a href="#conf-change" class="headerlink" title="conf change"></a>conf change</h2><div class="story post-story"><p>conf change 请求的主要作用是向 Raft group 中添加或删除 peer, 分为 add node 和 remove node 两种类型.</p>
+<p>add node: 在 Raft group 中添加节点, peer 只需要更改自己 peerStore 和 ctx.storeMeta 中的 region,<br>向其中添加 peer 即可. store_worker 在向该 peer 发送消息时才会新建 peer.</p>
+<p>吐槽: conf change 的消息类型以及处理方法为啥这么特别而又别扭? 是有什么特殊的考虑吗.</p>
+<p>remove node: 在 Raft group 中删除节点, 如果被删除的不是自己, peer 的行为与 add node 时类似,<br>如果删除的是自己, 直接调用 destroyPeer() 函数即可.</p>
+</div><h2 id="region-split"><a href="#region-split" class="headerlink" title="region split"></a>region split</h2><div class="story post-story"><p>在数据写入后, split checker 会定期检测 region 的大小, 符合条件时, 生产 region split 的 key.</p>
+</div><h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><div class="story post-story"><h3 id="1-handle-raft-message-failed-storeID-2-region-1-not-exists-but-not-tombstone"><a href="#1-handle-raft-message-failed-storeID-2-region-1-not-exists-but-not-tombstone" class="headerlink" title="1. handle raft message failed storeID 2, region 1 not exists but not tombstone"></a>1. handle raft message failed storeID 2, region 1 not exists but not tombstone</h3><p>process remove node 删除自己时, 首先调用了 destroyPeer() 修改 RaftLocalState tombstone,<br>后续没有判断这一情况, WriteRegionState 时又将 RaftLocalState 改为了 normal.</p>
+<h3 id="2-panic-region-1-6-unexpected-raft-log-index-lastIndex-0-lt-appliedIndex-5164"><a href="#2-panic-region-1-6-unexpected-raft-log-index-lastIndex-0-lt-appliedIndex-5164" class="headerlink" title="2. panic: [region 1] 6 unexpected raft log index: lastIndex 0 &lt; appliedIndex 5164"></a>2. panic: [region 1] 6 unexpected raft log index: lastIndex 0 &lt; appliedIndex 5164</h3><p>add node 在 store_worker 实际创建 peer 时报错.<br>raftState 和 applyState 分别从 kv engine 和 raft engine 中根据 region id 读取出,<br>applyState 是正常的, raftState 却是空的.</p>
+<p>原因: process 多个 entry 时, conf change 调用 destroyPeer 清空了 store,<br>下一条 entry 执行时又会更新 apply index, 重新写入了 applyState.</p>
+<p>process entry 时应该判断 d.stopped, 如果已经停止, 直接 return.</p>
+<h3 id="3-panic-request-timeout"><a href="#3-panic-request-timeout" class="headerlink" title="3. panic: request timeout"></a>3. panic: request timeout</h3><p>Raft group 中只有两个节点时, 再删除一个节点, 如果这个节点正好是 leader,<br>可能在 commit 消息发送前便把自己 destroy 了, 另一个节点便无法得知这一情况的发生, 永远无法选举成功.</p>
+<p>应该先 transfer leader 给剩下的节点, 直接返回错误, client 会进行重试, 再由剩下的节点来处理 remove node.</p>
+<h3 id="4-panic-resp-Responses-0-CmdType-raft-cmdpb-CmdType-Put"><a href="#4-panic-resp-Responses-0-CmdType-raft-cmdpb-CmdType-Put" class="headerlink" title="4. panic: resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put"></a>4. panic: resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put</h3><p>在三个节点的集群中删除一个节点后会发生这个问题. 在 append proposal 处打日志后发现,<br>同一个 index 的 proposal append 了多次.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">2022/03/17 15:32:08.334664 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Snap, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334670 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Snap, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334682 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Put, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334686 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Put, index 16681[0m</span><br></pre></td></tr></table></figure>
+
+<p>propose entry 后, Raft 的 last index 没有发生变化. transferLeader 产生的错误没有正确返回.</p>
+<h3 id="5-test-test-go-221-0-31m-fatal-get-wrong-value-client-17"><a href="#5-test-test-go-221-0-31m-fatal-get-wrong-value-client-17" class="headerlink" title="5. test_test.go:221: [0;31m[fatal] get wrong value, client 17"></a>5. test_test.go:221: [0;31m[fatal] get wrong value, client 17</h3><p>与问题 4 相同.</p>
+<h3 id="6-panic-region-1-4-meta-corruption-detected"><a href="#6-panic-region-1-4-meta-corruption-detected" class="headerlink" title="6. panic: [region 1] 4 meta corruption detected"></a>6. panic: [region 1] 4 meta corruption detected</h3><p>测试用例: TestSplitConfChangeSnapshotUnreliableRecoverConcurrentPartition3B</p>
+<p>出错代码行: /root/tinykv/kv/raftstore/peer_msg_handler.go:867 +0x417</p>
+<p>destroyPeer() 中删除 storeMeta regionRanges 中的 regionItem 时,<br>发现并没有对应的 regionItem.</p>
+<p>applySnapshot() 后不应该在 storeMeta 中删除 prevRegion 的 regionRanges,<br>在分区的情况下, 一个节点并没有收到 split message,<br>分区恢复后, 新分裂的 region 的 peer 先被创建并收到 snapshot, 向 storeMeta 中写入,<br>另一个 peer 收到 snapshot 时如果删除 prevRegion, 就会导致 panic.<br>prevRegin 的 endKey 恰好是另一个 peer 的已经写入的 endKey, 因此不能删除它.</p>
+<h3 id="7-panic-split-peer-count-not-equal-to-region-peer-count"><a href="#7-panic-split-peer-count-not-equal-to-region-peer-count" class="headerlink" title="7. panic: split peer count not equal to region peer count"></a>7. panic: split peer count not equal to region peer count</h3><p>自定义的 panic, split request 中的 id 的数目可能与 目前集群中的节点数不相同, 应该拒绝这个请求.</p>
+<h3 id="8-panic-entries’-high-586-is-out-of-bound-lastIndex-584"><a href="#8-panic-entries’-high-586-is-out-of-bound-lastIndex-584" class="headerlink" title="8. panic: entries’ high 586 is out of bound, lastIndex 584"></a>8. panic: entries’ high 586 is out of bound, lastIndex 584</h3><p>leader 向 follower 连续发送两次快照, follower 应用第一个快照并返回 response 后,<br>leader 会向 follower 发送 append entries, 此时 follower 应用了第二个快照,<br>follower 接受到 entries 后发现他们的 index 比自己的 last index 小, 尝试替换自己的日志,<br>但自己又没有这些日志, 便会引发这个错误.</p>
+<p>解决方法: 不调用 panic 直接返回即可.</p>
+<h3 id="9-request-timeout"><a href="#9-request-timeout" class="headerlink" title="9. request timeout"></a>9. request timeout</h3><p>3B 中会遇到各种各样的 request timeout.</p>
+<h3 id="9-1-send-message-err-message-is-dropped"><a href="#9-1-send-message-err-message-is-dropped" class="headerlink" title="9.1 send message err: message is dropped"></a>9.1 send message err: message is dropped</h3><p>在没有分区的情况下, leader 一个时间段内发送的所有消息都丢失了. 没有查明原因, 这个问题会导致 leader 发送的 snapshot 很容易丢失,<br>又因为在 2C 中优化了快照的发送次数, 很容易导致超时.</p>
+<h3 id="9-2-tombstone-peer-receives-a-stale-message"><a href="#9-2-tombstone-peer-receives-a-stale-message" class="headerlink" title="9.2. tombstone peer receives a stale message"></a>9.2. tombstone peer receives a stale message</h3><p>超时前出现不停出现 tombstone peer receives a stale message 的日志.</p>
+<h3 id="9-3-1-12-14677-is-registered-more-than-1-time"><a href="#9-3-1-12-14677-is-registered-more-than-1-time" class="headerlink" title="9.3 1_12_14677 is registered more than 1 time"></a>9.3 1_12_14677 is registered more than 1 time</h3><p>send snapshot 后出现这条错误. 超时前不停地出现这条错误.<br>当集群中只有两个节点 1, 2 时, 1 向 2 发送快照, 2 handel 后发送的 response 丢失了,<br>这时 1 无法 commit 新的 entry, 也无法发送同样的快照给2, 集群就这样永远不可用了.</p>
+<p>l.Index2Position(i) &lt; len(l.entries)</p>
+
+</div>
+  </div>
+  
+  
+    
+    <div class='footer'>
       
-        <div>
-          <a class='readmore' href='/2022/03/05/tinykv-project3-MultiRaftKV-PartB/' itemprop="url">
-            阅读全文
-          </a>
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/>http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/</a></p>
+              
+            
+          </blockquote>
         </div>
+      
       
     </div>
   
+  
+    
 
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-10T14:30:01+08:00">
+  <a class='notlink' href="/" onclick="return false;" title="Click me!" >
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：2022年4月10日</p>
+  </a>
 </div>
 
-          </div>
         
       
         
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/24/tinykv-project2-RaftKV-PartC/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/tinykv/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>tinykv</p></a></div>
+  <span hidden itemprop="keywords">tinykv</span>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/&title=tinykv-project3-MultiRaftKV-PartB - Moonm3n's blog&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/&title=tinykv-project3-MultiRaftKV-PartB - Moonm3n's blog&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/&title=tinykv-project3-MultiRaftKV-PartB - Moonm3n's blog&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+          
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+    <!-- Custom Files bottomMeta begin -->
+    
+    <!-- Custom Files bottomMeta end -->
+  </div>
+
+
   
   
+
   
+    <div class="prev-next">
+      
+        <a class='prev' href='/2022/03/22/TiKV-PD/'>
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>TiDB-PD</p>
+          <p class='content'>PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.
+
+
+实现原理PD 是一个逻辑上的单点, 物理上是一个集群, 集成 etcd, 支持故障恢复...</p>
+        </a>
+      
+      
+        <a class='next' href='/2022/02/24/tinykv-project2-RaftKV-PartC/'>
+          <p class='title'>tinykv-project2-RaftKV-PartC<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'>tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.
+
+
+snapshot 的实现分为两个部分.
+
+实现日志的定期清理.
+实现 snapshot 数据的发送.
+...</p>
+        </a>
+      
+    </div>
+  
+  <!-- Custom Files postEnd begin-->
+  
+  <!-- Custom Files postEnd end-->
+</article>
+
+
+  
+
+  
+  <article class="post white-box reveal shadow" id="comments">
     <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
+      <meta itemprop="discussionUrl" content="/2022/03/05/tinykv-project3-MultiRaftKV-PartB/index.html#comments">
     </span>
-  
-  
+    <p ct><i class='fas fa-comments'></i> 评论</p>
     
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/02/24/tinykv-project2-RaftKV-PartC/"  itemprop="url">
-        tinykv-project2-RaftKV-PartC
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
     
-      <p>tinykv project 2 part b, 实现快照机制, 定期对日志进行压缩.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-02-24T09:48:10+08:00">2022-02-24</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/02/24/tinykv-project2-RaftKV-PartC/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
+    <div id="layoutHelper-comments"></div>
 
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/03/tinykv-project2-RaftKV-PartB/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/02/03/tinykv-project2-RaftKV-PartB/"  itemprop="url">
-        tinykv-project2-RaftKV-PartB
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-02-03T17:56:59+08:00">2022-02-03</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/02/03/tinykv-project2-RaftKV-PartB/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/01/17/tinykv-project2-RaftKV-PartA/"  itemprop="url">
-        tinykv-project2-RaftKV-PartA
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 2 part a, 实现基本的 Raft 算法.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-01-17T15:30:04+08:00">2022-01-17</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/01/17/tinykv-project2-RaftKV-PartA/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow"  itemscope itemtype="http://schema.org/Article" >
-  <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/16/tinykv-project1-StandaloneKV/">
-  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Moonm3n's blog">
-  </span>
-  
-  
-  
-    <span hidden>
-      <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
-    </span>
-  
-  
-    
-    <h2 class="article-title"  itemprop="name headline">
-      <a href="/2022/01/16/tinykv-project1-StandaloneKV/"  itemprop="url">
-        tinykv-project1-StandaloneKV
-      </a>
-    </h2>
-  
-  <div class='md' itemprop="articleBody">
-    
-      <p>tinykv project 1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.</p>
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time itemprop="dateCreated datePublished" datetime="2022-01-16T19:37:20+08:00">2022-01-16</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/database-project/">database project</a>
-          
-            <span hidden itemprop="about" itemscope itemtype="http://schema.org/Thing">
-              <a href="/categories/database-project/" itemprop="url"><span itemprop="name">database project</span></a>
-            </span>
-          
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2022/01/16/tinykv-project1-StandaloneKV/' itemprop="url">
-            阅读全文
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-    
-  </section>
-  
-    
+  </article>
   
 
 
-    
-  
+
+
+
 </div>
 <aside id='l_side' itemscope itemtype="http://schema.org/WPSideBar">
   
@@ -2716,143 +2672,34 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
     
 
-<section class="widget blogger shadow desktop pjax">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box circle' href='/about/'>
-          <img no-lazy src='https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg' alt="This is a picture without description" />
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Moonm3n</h2>
-        
-        
-          <p>Building Distributed Systems…</p>
 
-        
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="mailto:me@xxx.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/Moonm3n/"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop pjax">
+  <section class="widget toc-wrapper shadow desktop mobile pjax" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/database-course/" href="/categories/database-course/"
-            active-action="action-categoriesdatabase-course"
-            ><div class='name'>database course</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/database-project/" href="/categories/database-project/"
-            active-action="action-categoriesdatabase-project"
-            ><div class='name'>database project</div><div class='badge'>(5)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/databases/" href="/categories/databases/"
-            active-action="action-categoriesdatabases"
-            ><div class='name'>databases</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/paper/" href="/categories/paper/"
-            active-action="action-categoriespaper"
-            ><div class='name'>paper</div><div class='badge'>(4)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-text">summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#transfer-leader"><span class="toc-text">transfer leader</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#conf-change"><span class="toc-text">conf change</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#region-split"><span class="toc-text">region split</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="toc-text">问题记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-handle-raft-message-failed-storeID-2-region-1-not-exists-but-not-tombstone"><span class="toc-text">1. handle raft message failed storeID 2, region 1 not exists but not tombstone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-panic-region-1-6-unexpected-raft-log-index-lastIndex-0-lt-appliedIndex-5164"><span class="toc-text">2. panic: [region 1] 6 unexpected raft log index: lastIndex 0 &lt; appliedIndex 5164</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-panic-request-timeout"><span class="toc-text">3. panic: request timeout</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-panic-resp-Responses-0-CmdType-raft-cmdpb-CmdType-Put"><span class="toc-text">4. panic: resp.Responses[0].CmdType !&#x3D; raft_cmdpb.CmdType_Put</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-test-test-go-221-0-31m-fatal-get-wrong-value-client-17"><span class="toc-text">5. test_test.go:221: [0;31m[fatal] get wrong value, client 17</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-panic-region-1-4-meta-corruption-detected"><span class="toc-text">6. panic: [region 1] 4 meta corruption detected</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-panic-split-peer-count-not-equal-to-region-peer-count"><span class="toc-text">7. panic: split peer count not equal to region peer count</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-panic-entries%E2%80%99-high-586-is-out-of-bound-lastIndex-584"><span class="toc-text">8. panic: entries’ high 586 is out of bound, lastIndex 584</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-request-timeout"><span class="toc-text">9. request timeout</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-send-message-err-message-is-dropped"><span class="toc-text">9.1 send message err: message is dropped</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-2-tombstone-peer-receives-a-stale-message"><span class="toc-text">9.2. tombstone peer receives a stale message</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-3-1-12-14677-is-registered-more-than-1-time"><span class="toc-text">9.3 1_12_14677 is registered more than 1 time</span></a></li></ol></li></ol>
     </div>
   </section>
-
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile pjax">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/Raft/" style="font-size: 14px; color: #999">Raft</a> <a href="/tags/TiDB/" style="font-size: 14px; color: #999">TiDB</a> <a href="/tags/cmu-15-445/" style="font-size: 14px; color: #999">cmu 15-445</a> <a href="/tags/tinykv/" style="font-size: 24px; color: #555">tinykv</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 <!-- 没有 pjax 占位会报错 万恶的 pjax -->
+
+  <div class="pjax">
+    <!-- pjax占位 -->
+  </div>
+
+  <div class="pjax">
+    <!-- pjax占位 -->
+  </div>
 
   <div class="pjax">
     <!-- pjax占位 -->
@@ -2881,14 +2728,15 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 </aside>
 
 
+
           <!--此文件用来存放一些不方便取值的变量-->
 <!--思路大概是将值藏到重加载的区域内-->
 
 <pjax>
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="tinykv-project3-MultiRaftKV-PartB";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   pdata.commentConfig={};
@@ -3002,8 +2850,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057287')
+      volantis.js('/js/message.js?time=1650028057287', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -3048,8 +2896,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057287')
+      volantis.js('/js/message.js?time=1650028057287', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -3108,8 +2956,8 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650028057372')
-      volantis.js('/js/message.js?time=1650028057372', () => {
+      volantis.css('/css/message.css?time=1650028057287')
+      volantis.js('/js/message.js?time=1650028057287', () => {
         hideMessage(done);
       });
     } else {
@@ -3327,7 +3175,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1650028057372')
+    volantis.js('/js/rightMenu.js?time=1650028057287')
   </script>
 
 
@@ -3341,19 +3189,19 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1650028057372")
+        volantis.js("/js/plugins/sites.js?time=1650028057287")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1650028057372")
+        volantis.js("/js/plugins/friends.js?time=1650028057287")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1650028057372")
+        volantis.js("/js/plugins/contributors.js?time=1650028057287")
       }
     
   };
@@ -3469,7 +3317,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
 
 
-<script src="/js/app.js?time=1650028057372.js"></script>
+<script src="/js/app.js?time=1650028057287.js"></script>
 
 
 <!-- optional -->
@@ -3590,7 +3438,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
   var runningOnBrowser = typeof window !== "undefined";
   var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
   if (!isBot) {
-    volantis.js('/js/parallax.js?time=1650028057372').then(()=>{
+    volantis.js('/js/parallax.js?time=1650028057287').then(()=>{
       parallax()
     })
     volantis.pjax.send(()=>{
@@ -3784,7 +3632,7 @@ transfer leadertransfer leader 请求不需要作为一个 entry 在 Raft group 
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/tags/tinykv/","name":"tinykv"}}]},{"@context":"http://schema.org","@type":"WebSite","name":"Moonm3n's blog","url":"http://example.com/","keywords":null,"description":"","author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","description":""},"publisher":{"@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"potentialAction":{"@type":"SearchAction","name":"Site Search","target":{"@type":"EntryPoint","urlTemplate":"http://example.com?s={search_term_string}"},"query-input":"required name=search_term_string"}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/","name":"tinykv-project3-MultiRaftKV-PartB"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project3-MultiRaftKV-PartB","description":"","datePublished":"2022-03-05T12:52:50.000Z","dateModified":"2022-04-10T06:30:01.057Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/03/05/tinykv-project3-MultiRaftKV-PartB/","wordCount":0,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 <!-- more -->
