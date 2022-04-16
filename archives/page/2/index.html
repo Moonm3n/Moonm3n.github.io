@@ -20,7 +20,7 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1650088369898" as="style">
+  <link rel="preload" href="/css/style.css?time=1650119408492" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
@@ -254,6 +254,103 @@ button {
   position: relative;
   overflow: hidden;
   margin-bottom: -100px;
+}
+.cover-wrapper .cover-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+}
+.cover-wrapper .cover-bg.lazyload:not(.loaded) {
+  opacity: 0;
+  -webkit-opacity: 0;
+  -moz-opacity: 0;
+}
+.cover-wrapper .cover-bg.lazyload.loaded {
+  animation-delay: 0s;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  animation-name: fadeIn;
+}
+@-moz-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@-o-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
 }
 .cover-wrapper .cover-body {
   z-index: 1;
@@ -718,71 +815,6 @@ button {
   .cover-wrapper.dock .menu {
     background: rgba(255,255,255,0.5);
     backdrop-filter: saturate(200%) blur(20px);
-  }
-}
-.cover-wrapper #parallax-window {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-.parallax-mirror {
-  animation-delay: 0s;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-  animation-timing-function: ease-out;
-  animation-name: fadeIn;
-}
-@-moz-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@-webkit-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@-o-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
   }
 }
 @font-face {
@@ -1623,8 +1655,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1650088369898" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1650088369898"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650119408492" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650119408492"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2315,7 +2347,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <!-- see: /layout/_partial/scripts/_ctrl/coverCtrl.ejs -->
       <div id="half" class='cover-wrapper  dock' style="display: ;">
         
-  <div id="parallax-window"></div>
+  <div class='cover-bg lazyload placeholder' data-bg="https://uploadbeta.com/api/pictures/random/?key=BingEverydayWallpaperPicture"></div>
 
 <div class='cover-body'>
   <div class='top'>
@@ -2418,7 +2450,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 								<a class="meta" href="/2022/03/05/tinykv-project3-MultiRaftKV-PartB/">
 									<time>03-05</time>
 									
-										tinykv-project3-MultiRaftKV-PartB
+										TinyKV Project3 MultiRaftKV PartB
 									
 									
 									
@@ -2434,7 +2466,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 								<a class="meta" href="/2022/02/24/tinykv-project2-RaftKV-PartC/">
 									<time>02-24</time>
 									
-										tinykv-project2-RaftKV-PartC
+										TinyKV Project2 RaftKV PartC
 									
 									
 									
@@ -2450,7 +2482,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 								<a class="meta" href="/2022/02/03/tinykv-project2-RaftKV-PartB/">
 									<time>02-03</time>
 									
-										tinykv-project2-RaftKV-PartB
+										Tinykv Project2 RaftKV PartB
 									
 									
 									
@@ -2466,7 +2498,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 								<a class="meta" href="/2022/01/17/tinykv-project2-RaftKV-PartA/">
 									<time>01-17</time>
 									
-										tinykv-project2-RaftKV-PartA
+										TinyKV Project2 RaftKV PartA
 									
 									
 									
@@ -2498,7 +2530,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 								<a class="meta" href="/2022/01/16/tinykv-project1-StandaloneKV/">
 									<time>01-16</time>
 									
-										tinykv-project1-StandaloneKV
+										TinyKV Project1 StandaloneKV
 									
 									
 									
@@ -2588,7 +2620,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
       
         <a class='avatar flat-box circle' href='/about/'>
-          <img no-lazy src='https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg' alt="This is a picture without description" />
+          <img no-lazy src='https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/avatar/avatar.jpeg?Expires=1650122511&OSSAccessKeyId=TMP.3KiP78cxcHvG4PZrifTVCYc6Z7gEh4Hhz6RvCtpWHTfzZU2w38zir2KqjRbtddQcPvSkZDBTXuWkHd9ELu4NHTnrr6tkd2&Signature=SlzWQb%2FI0Pexl0Re8tx%2FwF6Fko4%3D&versionId=CAEQVRiBgMC2wvrJgRgiIGRmYWIyNDg5OTYyMjQ5MDQ5MzA3NjA0YjRiOWRjN2Ey' alt="This is a picture without description" />
         </a>
       
     
@@ -2709,7 +2741,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
     <div class='content'>
-      <a href="/tags/Raft/" style="font-size: 14px; color: #999">Raft</a> <a href="/tags/TiDB/" style="font-size: 14px; color: #999">TiDB</a> <a href="/tags/cmu-15-445/" style="font-size: 14px; color: #999">cmu 15-445</a> <a href="/tags/tinykv/" style="font-size: 24px; color: #555">tinykv</a>
+      <a href="/tags/Raft/" style="font-size: 14px; color: #999">Raft</a> <a href="/tags/TiDB/" style="font-size: 14px; color: #999">TiDB</a> <a href="/tags/TinyKV/" style="font-size: 24px; color: #555">TinyKV</a> <a href="/tags/cmu-15-445/" style="font-size: 14px; color: #999">cmu 15-445</a>
     </div>
   </section>
 
@@ -2869,8 +2901,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369898')
-      volantis.js('/js/message.js?time=1650088369898', () => {
+      volantis.css('/css/message.css?time=1650119408492')
+      volantis.js('/js/message.js?time=1650119408492', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2915,8 +2947,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369898')
-      volantis.js('/js/message.js?time=1650088369898', () => {
+      volantis.css('/css/message.css?time=1650119408492')
+      volantis.js('/js/message.js?time=1650119408492', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2975,8 +3007,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369898')
-      volantis.js('/js/message.js?time=1650088369898', () => {
+      volantis.css('/css/message.css?time=1650119408492')
+      volantis.js('/js/message.js?time=1650119408492', () => {
         hideMessage(done);
       });
     } else {
@@ -3194,7 +3226,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1650088369898')
+    volantis.js('/js/rightMenu.js?time=1650119408492')
   </script>
 
 
@@ -3208,19 +3240,19 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1650088369898")
+        volantis.js("/js/plugins/sites.js?time=1650119408492")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1650088369898")
+        volantis.js("/js/plugins/friends.js?time=1650119408492")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1650088369898")
+        volantis.js("/js/plugins/contributors.js?time=1650119408492")
       }
     
   };
@@ -3336,7 +3368,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
 
-<script src="/js/app.js?time=1650088369898.js"></script>
+<script src="/js/app.js?time=1650119408492.js"></script>
 
 
 <!-- optional -->
@@ -3411,61 +3443,6 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
 
-
-
-  <script>
-  let imgs = ["https://s2.loli.net/2021/12/14/YfZqLi8pyvlImGg.png"];
-  let index = 0;
-  let IntervalParallax = null;
-
-  function parallax(){
-    let ParallaxWindow = document.querySelector("#parallax-window");
-    
-    Parallax.window = ParallaxWindow;
-    Parallax.options.fade = 1500;
-    Parallax.cache = 1;
-    next_parallax();
-    Parallax.init();
-    if (imgs.length>1) {
-      IntervalParallax = setInterval(function () {
-        next_parallax();
-      }, '10000');
-    }
-  }
-
-  function next_parallax() {
-    if (typeof Parallax == "undefined") {
-      return
-    }
-    
-      if (!document.querySelector("#full")&&!document.querySelector("#half")) {
-        return
-      }
-    
-    if (imgs.length>=1) {
-      Parallax.options.src = imgs[index % imgs.length];
-      Parallax.start();
-      index++;
-      if (Parallax.cache) {
-        fetch(imgs[index % imgs.length] +"?t=" + new Date().getTime());
-        if (index == imgs.length) {
-          Parallax.cache = 0;
-        }
-      }
-    }
-  }
-  var runningOnBrowser = typeof window !== "undefined";
-  var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
-  if (!isBot) {
-    volantis.js('/js/parallax.js?time=1650088369898').then(()=>{
-      parallax()
-    })
-    volantis.pjax.send(()=>{
-      clearInterval(IntervalParallax)
-    },"clearIntervalParallax");
-    volantis.pjax.push(parallax);
-  }
-</script>
 
 
 

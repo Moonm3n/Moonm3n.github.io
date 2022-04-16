@@ -20,25 +20,25 @@
   <meta content="Moonm3n&#39;s blog" name="apple-mobile-web-app-title">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="telephone=no" name="format-detection">
-  <link rel="preload" href="/css/style.css?time=1650088369882" as="style">
+  <link rel="preload" href="/css/style.css?time=1650119408477" as="style">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 
   <!-- 页面元数据 -->
-  <title>tinykv-project2-RaftKV-PartA - Moonm3n's blog</title>
-  <meta name="keywords" content="tinykv,null">
-  <meta name="description" content="tinykv project 2 part a, 实现基本的 Raft 算法.">
+  <title>TinyKV Project2 RaftKV PartA - Moonm3n's blog</title>
+  <meta name="keywords" content="TinyKV,null">
+  <meta name="description" content="TinyKV Project2 Part A, 实现基本的 Raft 算法.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="tinykv-project2-RaftKV-PartA">
+<meta property="og:title" content="TinyKV Project2 RaftKV PartA">
 <meta property="og:url" content="http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/index.html">
 <meta property="og:site_name" content="Moonm3n&#39;s blog">
-<meta property="og:description" content="tinykv project 2 part a, 实现基本的 Raft 算法.">
+<meta property="og:description" content="TinyKV Project2 Part A, 实现基本的 Raft 算法.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-01-17T07:30:04.000Z">
-<meta property="article:modified_time" content="2022-04-16T05:31:05.838Z">
+<meta property="article:modified_time" content="2022-04-16T13:18:59.247Z">
 <meta property="article:author" content="Yueyang Zhan">
-<meta property="article:tag" content="tinykv">
+<meta property="article:tag" content="TinyKV">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png">
   <!-- feed -->
@@ -259,6 +259,103 @@ button {
   position: relative;
   overflow: hidden;
   margin-bottom: -100px;
+}
+.cover-wrapper .cover-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+}
+.cover-wrapper .cover-bg.lazyload:not(.loaded) {
+  opacity: 0;
+  -webkit-opacity: 0;
+  -moz-opacity: 0;
+}
+.cover-wrapper .cover-bg.lazyload.loaded {
+  animation-delay: 0s;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  animation-name: fadeIn;
+}
+@-moz-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@-o-keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    -webkit-opacity: 0;
+    -moz-opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -khtml-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -o-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    -webkit-opacity: 1;
+    -moz-opacity: 1;
+  }
 }
 .cover-wrapper .cover-body {
   z-index: 1;
@@ -723,71 +820,6 @@ button {
   .cover-wrapper.dock .menu {
     background: rgba(255,255,255,0.5);
     backdrop-filter: saturate(200%) blur(20px);
-  }
-}
-.cover-wrapper #parallax-window {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-.parallax-mirror {
-  animation-delay: 0s;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-  animation-timing-function: ease-out;
-  animation-name: fadeIn;
-}
-@-moz-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@-webkit-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@-o-keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
-  }
-}
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    -webkit-opacity: 0;
-    -moz-opacity: 0;
-    filter: blur(12px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-opacity: 1;
-    -moz-opacity: 1;
   }
 }
 @font-face {
@@ -1628,8 +1660,8 @@ ul.list-v >li>a:hover {
 }
 
   </style>
-  <link rel="stylesheet" href="/css/style.css?time=1650088369882" media="print" onload="this.media='all';this.onload=null">
-  <noscript><link rel="stylesheet" href="/css/style.css?time=1650088369882"></noscript>
+  <link rel="stylesheet" href="/css/style.css?time=1650119408477" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="/css/style.css?time=1650119408477"></noscript>
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -2320,7 +2352,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <!-- see: /layout/_partial/scripts/_ctrl/coverCtrl.ejs -->
       <div id="none" class='cover-wrapper post dock' style="display: none;">
         
-  <div id="parallax-window"></div>
+  <div class='cover-bg lazyload placeholder' data-bg="https://uploadbeta.com/api/pictures/random/?key=BingEverydayWallpaperPicture"></div>
 
 <div class='cover-body'>
   <div class='top'>
@@ -2413,7 +2445,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
     
       <h1 class="title" itemprop="name headline">
-        tinykv-project2-RaftKV-PartA
+        TinyKV Project2 RaftKV PartA
       </h1>
       <div class='new-meta-box'>
         
@@ -2421,7 +2453,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
             
 <div class='new-meta-item author' itemprop="author" itemscope itemtype="http://schema.org/Person">
   <a itemprop="url" class='author' href="/" rel="nofollow">
-    <img itemprop="image" src="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" class="lazyload" data-srcset="https://s2.loli.net/2021/12/14/BbxZzKRp54t2ufi.jpg" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
+    <img itemprop="image" src="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/avatar/avatar.jpeg?Expires=1650122511&OSSAccessKeyId=TMP.3KiP78cxcHvG4PZrifTVCYc6Z7gEh4Hhz6RvCtpWHTfzZU2w38zir2KqjRbtddQcPvSkZDBTXuWkHd9ELu4NHTnrr6tkd2&Signature=SlzWQb%2FI0Pexl0Re8tx%2FwF6Fko4%3D&versionId=CAEQVRiBgMC2wvrJgRgiIGRmYWIyNDg5OTYyMjQ5MDQ5MzA3NjA0YjRiOWRjN2Ey" class="lazyload" data-srcset="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/avatar/avatar.jpeg?Expires=1650122511&OSSAccessKeyId=TMP.3KiP78cxcHvG4PZrifTVCYc6Z7gEh4Hhz6RvCtpWHTfzZU2w38zir2KqjRbtddQcPvSkZDBTXuWkHd9ELu4NHTnrr6tkd2&Signature=SlzWQb%2FI0Pexl0Re8tx%2FwF6Fko4%3D&versionId=CAEQVRiBgMC2wvrJgRgiIGRmYWIyNDg5OTYyMjQ5MDQ5MzA3NjA0YjRiOWRjN2Ey" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="This is a picture without description" >
     <p itemprop="name">yueyang</p>
   </a>
 </div>
@@ -2468,36 +2500,46 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   <div id="layoutHelper-page-plugins"></div>
   <div id="post-body" itemprop="articleBody">
-    <p>tinykv project 2 part a, 实现基本的 Raft 算法.</p>
+    <p>TinyKV Project2 Part A, 实现基本的 Raft 算法.</p>
 <span id="more"></span>
 
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><div class="story post-story"><p>实现基本的 Raft 算法</p>
-</div><h2 id="2aa-leader-election"><a href="#2aa-leader-election" class="headerlink" title="2aa leader election"></a>2aa leader election</h2><div class="story post-story"><h3 id="leader-election-流程"><a href="#leader-election-流程" class="headerlink" title="leader election 流程"></a>leader election 流程</h3><ol>
-<li>什么时候开始选举?<ol>
-<li>follow 在超时时间内没有收到心跳, 认为 leader 已经失效, 转变为 candidate 开始选举.</li>
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><div class="story post-story"><p>实现基本的 Raft 算法, 包括 Leader election 和 Log replication.</p>
+</div><h2 id="2AA-Leader-election"><a href="#2AA-Leader-election" class="headerlink" title="2AA Leader election"></a>2AA Leader election</h2><div class="story post-story"><p>Raft 算法使用随机计时器来选举领导者,<br>Raft 算法中的状态及状态间的转换关系如下图所示:<br><img src="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/Raft/Raft-state-transition.jpg?Expires=1650117470&OSSAccessKeyId=TMP.3KiP78cxcHvG4PZrifTVCYc6Z7gEh4Hhz6RvCtpWHTfzZU2w38zir2KqjRbtddQcPvSkZDBTXuWkHd9ELu4NHTnrr6tkd2&Signature=GsfQofzk9jHAf3g1TyIpqGZHnAY=&versionId=CAEQVRiBgICs0ebJgRgiIGM2MjJmMjdlOThlNjRkZDBhNTE3ZDdhMjE0MTE3MDM4" class="lazyload" data-srcset="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/Raft/Raft-state-transition.jpg?Expires=1650117470&OSSAccessKeyId=TMP.3KiP78cxcHvG4PZrifTVCYc6Z7gEh4Hhz6RvCtpWHTfzZU2w38zir2KqjRbtddQcPvSkZDBTXuWkHd9ELu4NHTnrr6tkd2&Signature=GsfQofzk9jHAf3g1TyIpqGZHnAY=&versionId=CAEQVRiBgICs0ebJgRgiIGM2MjJmMjdlOThlNjRkZDBhNTE3ZDdhMjE0MTE3MDM4" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Raft-state-transition"></p>
+<h3 id="Leader-election-流程"><a href="#Leader-election-流程" class="headerlink" title="Leader election 流程"></a>Leader election 流程</h3><ol>
+<li><p>什么时候开始选举?</p>
+<ul>
+<li><p>当一个节点转变为 candidate 时, 立即开始选举. </p>
+</li>
+<li><ol>
+<li>follow 在超时时间内没有收到来自 leader 的心跳, 认为 leader 已经失效, 转变为 candidate 开始选举.</li>
 <li>选举超时时, 没有节点赢得选举, 所有 candidate 会随机等待一段时间, 然后重新选举.</li>
 </ol>
 </li>
-<li>candidate 是怎样选举的?<ol>
+</ul>
+</li>
+<li><p>candidate 怎样开始选举?</p>
+<ol>
 <li>成为 candidate 后首先自增 term.</li>
 <li>为自己投票.</li>
 <li>重制选举超时计时器.</li>
 <li>发送请求投票的 RPC 给其他所有服务器.</li>
 </ol>
 </li>
-<li>candidate 怎样结束选举?<ol>
+<li><p>candidate 怎样结束选举?</p>
+<ol>
 <li>接收到大多数节点的选票, 成为 leader 并立即向其他节点发送心跳.</li>
-<li>发现了其他 leader, 且这个 leader 的 term <strong>不小于</strong>自己的 term.</li>
+<li>发现了其他 leader, 且这个 leader 的 term <strong>不小于</strong> 自己的 term.</li>
 <li>选举超时, candidate 会随机等待一段时间, 再次自增 term, 然后重新选举.</li>
 </ol>
 </li>
-<li>follower 怎样投票?<ol>
+<li><p>follower 怎样投票?</p>
+<ol>
 <li>每个 follower 只会对一个 term 投一次票.</li>
 <li>申请选票的 candidate 必须包含所有已提交的日志.</li>
 </ol>
 </li>
 </ol>
-<h3 id="leader-election-实现"><a href="#leader-election-实现" class="headerlink" title="leader election 实现"></a>leader election 实现</h3><p>Raft 算法的 leader election 是在时钟超时时触发的, tinykv 的 Raft 算法采用逻辑时钟来进行计时, 首先需要确定在哪里处理超时, 开始 leader election.<br>观察一下 Raft 结构体的成员, 逻辑时钟的值应该存放在 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code> 这两个变量中.</p>
+<h3 id="Leader-election-实现"><a href="#Leader-election-实现" class="headerlink" title="Leader election 实现"></a>Leader election 实现</h3><p>Raft 算法的 leader election 是在时钟超时时触发的, tinykv 的 Raft 算法采用逻辑时钟来进行计时, 首先需要确定在哪里处理超时, 开始 leader election.<br>观察一下 Raft 结构体的成员, 逻辑时钟的值应该存放在 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code> 这两个变量中.</p>
 <ul>
 <li>heartbeatElapsed 记录了上次心跳超时以来的 ticks 数, 只有 leader 会保持这个值, 超时时发送心跳.</li>
 <li>electionElapsed 对 leader 和 candidate 而言, 记录了上次选举超时以来的 ticks 数; 对 follower 而言, 记录了上次收到 leader 的有效消息以来的 ticks 数. 超时时启动选举.</li>
@@ -2514,7 +2556,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <li>MessageType_MsgRequestVote</li>
 <li>MessageType_MsgRequestVoteResponse 只有 candidate 会接受这个消息.</li>
 </ul>
-</div><h2 id="2ab-log-replication"><a href="#2ab-log-replication" class="headerlink" title="2ab log replication"></a>2ab log replication</h2><div class="story post-story"><h3 id="log-replication-相关概念"><a href="#log-replication-相关概念" class="headerlink" title="log replication 相关概念"></a>log replication 相关概念</h3><p>日志的几个 index:</p>
+</div><h2 id="2AB-Log-replication"><a href="#2AB-Log-replication" class="headerlink" title="2AB Log replication"></a>2AB Log replication</h2><div class="story post-story"><h3 id="Log-replication-相关概念"><a href="#Log-replication-相关概念" class="headerlink" title="Log replication 相关概念"></a>Log replication 相关概念</h3><p>日志的几个 index:</p>
 <ul>
 <li>stabled: 已经被持久化的日志的最大 index.</li>
 <li>committed: 已经被提交的日志的最大 index.</li>
@@ -2522,15 +2564,15 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 </ul>
 <p>日志先被 stabled, 再被 commit, 最后被 applied.</p>
 <p>snapshot/first…..applied….committed….stabled…..last</p>
-<h3 id="log-replication-流程"><a href="#log-replication-流程" class="headerlink" title="log replication 流程"></a>log replication 流程</h3><ol>
+<h3 id="Log-replication-流程"><a href="#Log-replication-流程" class="headerlink" title="Log replication 流程"></a>Log replication 流程</h3><ol>
 <li>节点成为 leader 时将所有 peer 的 nextIndex 初始化为 lastIndex + 1, 所有 peer 的 matchIndex 初始化为 0.</li>
 <li>接收到 client 请求, 将请求添加到自己的日志中.</li>
 <li>发送 AppendEntries RPC 给所有 peer, 并等待所有 peer 的回复.</li>
 <li></li>
 </ol>
-<h3 id="log-replication-实现"><a href="#log-replication-实现" class="headerlink" title="log replication 实现"></a>log replication 实现</h3><p>日志的 index 从 1 开始,</p>
+<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>日志的 index 从 1 开始,</p>
 <p>committed, applied, stabled 应该日志的 index 而不是切片的下标.</p>
-</div><h2 id="2ac-raw-node-interface"><a href="#2ac-raw-node-interface" class="headerlink" title="2ac raw node interface"></a>2ac raw node interface</h2><div class="story post-story"><p>Ready{}<br>Ready 封装了可以读取、持久化、提交的状态.</p>
+</div><h2 id="2AC-Raw-node-interface"><a href="#2AC-Raw-node-interface" class="headerlink" title="2AC Raw node interface"></a>2AC Raw node interface</h2><div class="story post-story"><p>Ready{}<br>Ready 封装了可以读取、持久化、提交的状态.</p>
 <p>Entries: specifies entries to be saved to stable storage BEFORE messages are sent.<br>CommittedEntries: specifies entries to be committed to a store/state-machine.<br>These have previously been committed to stable store.<br>Ready()</p>
 <p>Advanced()</p>
 
@@ -2569,7 +2611,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-16T13:31:05+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-16T21:18:59+08:00">
   <a class='notlink' href="/" onclick="return false;" title="Click me!" >
     <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
     <p>更新于：2022年4月16日</p>
@@ -2581,8 +2623,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         
           
   
-  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/tinykv/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>tinykv</p></a></div>
-  <span hidden itemprop="keywords">tinykv</span>
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/TinyKV/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>TinyKV</p></a></div>
+  <span hidden itemprop="keywords">TinyKV</span>
 
 
         
@@ -2595,7 +2637,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       
         <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
           
-          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=tinykv-project2-RaftKV-PartA - Moonm3n's blog&summary=tinykv project 2 part a, 实现基本的 Raft 算法."
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=TinyKV Project2 RaftKV PartA - Moonm3n's blog&summary=TinyKV Project2 Part A, 实现基本的 Raft 算法."
           
           >
           
@@ -2607,7 +2649,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       
         <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
           
-          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=tinykv-project2-RaftKV-PartA - Moonm3n's blog&summary=tinykv project 2 part a, 实现基本的 Raft 算法."
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=TinyKV Project2 RaftKV PartA - Moonm3n's blog&summary=TinyKV Project2 Part A, 实现基本的 Raft 算法."
           
           >
           
@@ -2619,7 +2661,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       
         <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
           
-          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=tinykv-project2-RaftKV-PartA - Moonm3n's blog&summary=tinykv project 2 part a, 实现基本的 Raft 算法."
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/&title=TinyKV Project2 RaftKV PartA - Moonm3n's blog&summary=TinyKV Project2 Part A, 实现基本的 Raft 算法."
           
           >
           
@@ -2653,11 +2695,11 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class="prev-next">
       
         <a class='prev' href='/2022/02/03/tinykv-project2-RaftKV-PartB/'>
-          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>tinykv-project2-RaftKV-PartB</p>
-          <p class='content'>tinykv project 2 part b, 利用 Raft 模块构建容错的 KV 存储服务.
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>Tinykv Project2 RaftKV PartB</p>
+          <p class='content'>TinyKV Project2 Part B, 利用 Raft 模块构建容错的 KV 存储服务.
 
 
-Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
+Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
         </a>
       
       
@@ -2713,7 +2755,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 
 
     <div class='content'>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2aa-leader-election"><span class="toc-text">2aa leader election</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#leader-election-%E6%B5%81%E7%A8%8B"><span class="toc-text">leader election 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader-election-%E5%AE%9E%E7%8E%B0"><span class="toc-text">leader election 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2ab-log-replication"><span class="toc-text">2ab log replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#log-replication-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-text">log replication 相关概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#log-replication-%E6%B5%81%E7%A8%8B"><span class="toc-text">log replication 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#log-replication-%E5%AE%9E%E7%8E%B0"><span class="toc-text">log replication 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2ac-raw-node-interface"><span class="toc-text">2ac raw node interface</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AA-Leader-election"><span class="toc-text">2AA Leader election</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E6%B5%81%E7%A8%8B"><span class="toc-text">Leader election 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Leader election 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AB-Log-replication"><span class="toc-text">2AB Log replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-text">Log replication 相关概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E6%B5%81%E7%A8%8B"><span class="toc-text">Log replication 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Log replication 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AC-Raw-node-interface"><span class="toc-text">2AC Raw node interface</span></a></li></ol>
     </div>
   </section>
 
@@ -2765,7 +2807,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 <script>
   window.pdata={}
   pdata.ispage=true;
-  pdata.postTitle="tinykv-project2-RaftKV-PartA";
+  pdata.postTitle="TinyKV Project2 RaftKV PartA";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   pdata.commentConfig={};
@@ -2879,8 +2921,8 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
   <script>
   volantis.message = (title, message, option = {}, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369882')
-      volantis.js('/js/message.js?time=1650088369882', () => {
+      volantis.css('/css/message.css?time=1650119408477')
+      volantis.js('/js/message.js?time=1650119408477', () => {
         tozashMessage(title, message, option, done);
       });
     } else {
@@ -2925,8 +2967,8 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 
   volantis.question = (title, message, option = {}, success = null, cancel = null, done = null) => {
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369882')
-      volantis.js('/js/message.js?time=1650088369882', () => {
+      volantis.css('/css/message.css?time=1650119408477')
+      volantis.js('/js/message.js?time=1650119408477', () => {
         tozashQuestion(title, message, option, success, cancel, done);
       });
     } else {
@@ -2985,8 +3027,8 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
     }
     
     if (typeof iziToast === "undefined") {
-      volantis.css('/css/message.css?time=1650088369882')
-      volantis.js('/js/message.js?time=1650088369882', () => {
+      volantis.css('/css/message.css?time=1650119408477')
+      volantis.js('/js/message.js?time=1650119408477', () => {
         hideMessage(done);
       });
     } else {
@@ -3204,7 +3246,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
     
       volantis.APlayerController = {};
     
-    volantis.js('/js/rightMenu.js?time=1650088369882')
+    volantis.js('/js/rightMenu.js?time=1650119408477')
   </script>
 
 
@@ -3218,19 +3260,19 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
     
       const sites_api = document.getElementById('sites-api');
       if (sites_api != undefined && typeof SitesJS === 'undefined') {
-        volantis.js("/js/plugins/sites.js?time=1650088369882")
+        volantis.js("/js/plugins/sites.js?time=1650119408477")
       }
     
     
       const friends_api = document.getElementById('friends-api');
       if (friends_api != undefined && typeof FriendsJS === 'undefined') {
-        volantis.js("/js/plugins/friends.js?time=1650088369882")
+        volantis.js("/js/plugins/friends.js?time=1650119408477")
       }
     
     
       const contributors_api = document.getElementById('contributors-api');
       if (contributors_api != undefined && typeof ContributorsJS === 'undefined') {
-        volantis.js("/js/plugins/contributors.js?time=1650088369882")
+        volantis.js("/js/plugins/contributors.js?time=1650119408477")
       }
     
   };
@@ -3346,7 +3388,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 
 
 
-<script src="/js/app.js?time=1650088369882.js"></script>
+<script src="/js/app.js?time=1650119408477.js"></script>
 
 
 <!-- optional -->
@@ -3421,61 +3463,6 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 
 
 
-
-
-  <script>
-  let imgs = ["https://s2.loli.net/2021/12/14/YfZqLi8pyvlImGg.png"];
-  let index = 0;
-  let IntervalParallax = null;
-
-  function parallax(){
-    let ParallaxWindow = document.querySelector("#parallax-window");
-    
-    Parallax.window = ParallaxWindow;
-    Parallax.options.fade = 1500;
-    Parallax.cache = 1;
-    next_parallax();
-    Parallax.init();
-    if (imgs.length>1) {
-      IntervalParallax = setInterval(function () {
-        next_parallax();
-      }, '10000');
-    }
-  }
-
-  function next_parallax() {
-    if (typeof Parallax == "undefined") {
-      return
-    }
-    
-      if (!document.querySelector("#full")&&!document.querySelector("#half")) {
-        return
-      }
-    
-    if (imgs.length>=1) {
-      Parallax.options.src = imgs[index % imgs.length];
-      Parallax.start();
-      index++;
-      if (Parallax.cache) {
-        fetch(imgs[index % imgs.length] +"?t=" + new Date().getTime());
-        if (index == imgs.length) {
-          Parallax.cache = 0;
-        }
-      }
-    }
-  }
-  var runningOnBrowser = typeof window !== "undefined";
-  var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
-  if (!isBot) {
-    volantis.js('/js/parallax.js?time=1650088369882').then(()=>{
-      parallax()
-    })
-    volantis.pjax.send(()=>{
-      clearInterval(IntervalParallax)
-    },"clearIntervalParallax");
-    volantis.pjax.push(parallax);
-  }
-</script>
 
 
 
@@ -3661,7 +3648,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"tinykv-project2-RaftKV-PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"tinykv-project2-RaftKV-PartA","description":"tinykv project 2 part a, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-16T05:31:05.838Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":39,"articleSection":"database project","keywords":"tinykv","image":{"@type":"ImageObject","url":"https://s2.loli.net/2022/04/16/PAkjEigQT2WqBI5.png","width":1024,"height":768}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"http://example.com/","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"http://example.com/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"http://example.com/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"TinyKV Project2 RaftKV PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TinyKV Project2 RaftKV PartA","description":"TinyKV Project2 Part A, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-16T13:18:59.247Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png"},"url":"http://example.com/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"http://example.com/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":38,"articleSection":"database project","keywords":"TinyKV","image":{"@type":"ImageObject","url":"https://s2.loli.net/2022/04/16/PAkjEigQT2WqBI5.png","width":1024,"height":768}}]</script>
 
 
 <!-- more -->
