@@ -44,7 +44,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-01-17T07:30:04.000Z">
-<meta property="article:modified_time" content="2022-04-17T08:04:20.223Z">
+<meta property="article:modified_time" content="2022-04-19T04:01:58.950Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="TinyKV">
 <meta name="twitter:card" content="summary">
@@ -1753,9 +1753,9 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   volantis.GLOBAL_CONFIG ={
     debug: false,
-    cdn: {"js":{"app":"/js/app.80db1a18.js","parallax":"/js/plugins/parallax.8bf0ab10.js","rightMenu":"/js/plugins/rightMenu.1d2dd3e0.js","rightMenus":"/js/plugins/rightMenus.3669cc79.js","sites":"/js/plugins/tags/sites.76bf19b8.js","friends":"/js/plugins/tags/friends.f372da57.js","contributors":"/js/plugins/tags/contributors.aec80453.js","search":"https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650187321439"},"css":{"style":"/css/style.f19b4e92.css"}},
+    cdn: {"js":{"app":"/js/app.80db1a18.js","parallax":"/js/plugins/parallax.8bf0ab10.js","rightMenu":"/js/plugins/rightMenu.1d2dd3e0.js","rightMenus":"/js/plugins/rightMenus.3669cc79.js","sites":"/js/plugins/tags/sites.76bf19b8.js","friends":"/js/plugins/tags/friends.f372da57.js","contributors":"/js/plugins/tags/contributors.aec80453.js","search":"https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650340928837"},"css":{"style":"/css/style.f19b4e92.css"}},
     default: {"avatar":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/avatar/round/3442075.svg","link":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/link/8f277b4ee0ecd.svg","cover":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/cover/76b86c0226ffd.svg","image":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/image/2659360.svg"},
-    lastupdate: new Date(1650187321439),
+    lastupdate: new Date(1650340928837),
     sidebar: {
       for_page: ["blogger","category","tagcloud","donate"],
       for_post: ["toc"],
@@ -2514,11 +2514,9 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
   
-    <div class='headimg-div'>
-      <a class='headimg-a'>
-        <img itemprop="image" class='headimg' src='https://s2.loli.net/2022/04/16/PAkjEigQT2WqBI5.png'/>
-      </a>
-    </div>
+    <span hidden>
+      <meta itemprop="image" content="https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png">
+    </span>
   
   <div class="article-meta" id="top">
     
@@ -2584,73 +2582,100 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <span id="more"></span>
 
 <h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><div class="story post-story"><p>实现基本的 Raft 算法, 包括 Leader election 和 Log replication.</p>
-</div><h2 id="2AA-Leader-election"><a href="#2AA-Leader-election" class="headerlink" title="2AA Leader election"></a>2AA Leader election</h2><div class="story post-story"><p>Raft 算法中有三种状态, Leader, Candidate 和 Follower.<br>Raft 算法中的状态及状态间的转换关系如下图所示:<br><img src="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/img/raft-state-transition.jpg" class="lazyload" data-srcset="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/img/raft-state-transition.jpg" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="raft-state-transition"><br>Raft 算法使用随机计时器来选举领导者,</p>
-<h3 id="Leader-election-流程"><a href="#Leader-election-流程" class="headerlink" title="Leader election 流程"></a>Leader election 流程</h3><ol>
-<li><p>什么时候开始选举?</p>
-<ul>
-<li><p>当一个节点转变为 candidate 时, 立即开始选举.</p>
-</li>
-<li><ol>
-<li>follow 在超时时间内没有收到来自 leader 的心跳, 认为 leader 已经失效, 转变为 candidate 开始选举.</li>
-<li>选举超时时, 没有节点赢得选举, 所有 candidate 会随机等待一段时间, 然后重新选举.</li>
+</div><h2 id="2AA-Leader-election"><a href="#2AA-Leader-election" class="headerlink" title="2AA Leader election"></a>2AA Leader election</h2><div class="story post-story"><p>Raft 算法中有三种状态, Leader, Candidate 和 Follower. Leader 负责处理所有的 Client 请求, Follower 只被动地响应 Leader 或 Candidate 的请求. Candidate 负责发起选举并处理选举结果.<br>Raft 算法中的状态及状态间的转换关系如下图所示:<br><img src="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/img/raft-state-transition.jpg" class="lazyload" data-srcset="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/img/raft-state-transition.jpg" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="raft-state-transition"><br>在这一步, 我们要实现 Raft 层的 Leader election 部分.</p>
+<h3 id="Leader-election-流程"><a href="#Leader-election-流程" class="headerlink" title="Leader election 流程"></a>Leader election 流程</h3><p>Raft 算法使用随机计时器来选举 Leader, 集群中通常只有一个 Leader, Leader 会定期向所有其他节点广播心跳来彰显自己的领导权. 节点的状态并不会持久化, 所有节点都是以 Follower 状态启动或重启.</p>
+<p>Leader election 的整体流程为:</p>
+<ol>
+<li>开始选举</li>
+<li>收到大多数确认选票, 成为 Leader.</li>
+<li>收到大多数否定选票, 成为 Follower.</li>
+<li>收到 Leader 消息, 成为 Follower.</li>
+<li>超时重新开始选举.</li>
 </ol>
+<p>更细节的问题:</p>
+<ol>
+<li>什么时候开始选举?<ul>
+<li>总的来说, 当一个节点认为集群中没有 Leader 或者 Leader 已经宕机时, 它会转变为 Candidate 并发起选举. 只有 Candidate 才能发起选举.<ul>
+<li>对 Follower 而言, 在超时时间内没有收到来自 Leader 的心跳, 或者没有给 Candidate 投票时, 它会转变为 Candidate 并发起选举. 收到来自 Leader 的心跳说明集群中存在正在运行的 Leader, 投票给 Candidate 说明 Follower 认可该节点成为 Leader.</li>
+<li>对 Candidate 而言, 在超时时间内没有收到足够的确认选票时, 它会自增 term 再次开始选举.</li>
+<li>对 Leader 而言, 除非发现了集群中有 term 更高的 Leader 存在, 否则它不会放弃自己的领导权. Leader 不会转变为 Candidate, 也就不会发起选举.</li>
+</ul>
 </li>
 </ul>
 </li>
-<li><p>candidate 怎样开始选举?</p>
-<ol>
-<li>成为 candidate 后首先自增 term.</li>
+<li>Candidate 怎样开始选举?<ol>
+<li>节点转变为 Candidate 后首先自增 term.</li>
 <li>为自己投票.</li>
 <li>重制选举超时计时器.</li>
 <li>发送请求投票的 RPC 给其他所有服务器.</li>
 </ol>
 </li>
-<li><p>candidate 怎样结束选举?</p>
-<ol>
-<li>接收到大多数节点的选票, 成为 leader 并立即向其他节点发送心跳.</li>
-<li>发现了其他 leader, 且这个 leader 的 term <strong>不小于</strong> 自己的 term.</li>
-<li>选举超时, candidate 会随机等待一段时间, 再次自增 term, 然后重新选举.</li>
+<li>Candidate 怎样结束选举?<ul>
+<li>接收到大多数节点的确认选票, 转变为 Leader 并立即向其他节点发送心跳.</li>
+<li>发现了其他 Leader, 且这个 Leader 的 term <strong>不小于</strong> 自己的 term.</li>
+<li>选举超时, Candidate 会再次自增 term, 然后重新选举.</li>
+</ul>
+</li>
+<li>节点怎样投票?<ol>
+<li>每个节点每个 term 只会给一个节点投票, 再收到其他节点的 RequestVote 时, 直接拒绝.</li>
+<li>申请选票的 Candidate 必须有更高的 term, 否则拒绝.</li>
+<li>申请选票的 Candidate 必须有更新的日志, 否则拒绝.</li>
 </ol>
 </li>
-<li><p>follower 怎样投票?</p>
-<ol>
-<li>每个 follower 只会对一个 term 投一次票.</li>
-<li>申请选票的 candidate 必须包含所有已提交的日志.</li>
 </ol>
-</li>
-</ol>
-<h3 id="Leader-election-实现"><a href="#Leader-election-实现" class="headerlink" title="Leader election 实现"></a>Leader election 实现</h3><p>Raft 算法的 leader election 是在时钟超时时触发的, tinykv 的 Raft 算法采用逻辑时钟来进行计时, 首先需要确定在哪里处理超时, 开始 leader election.<br>观察一下 Raft 结构体的成员, 逻辑时钟的值应该存放在 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code> 这两个变量中.</p>
+<h3 id="Leader-election-实现"><a href="#Leader-election-实现" class="headerlink" title="Leader election 实现"></a>Leader election 实现</h3><p>根据文档的描述, 我们首先从 <code>raft.Raft.tick()</code> 开始.</p>
+<p><code>raft.Raft.tick()</code> 的作用是递增逻辑时钟, 从而驱动选举超时或心跳超时. Raft 根据 term 来判断消息是否过期, 不需要比较消息发送时的逻辑时间, 因此, 不需要一个变量来记录实际的逻辑时间, 只需要用两个变量来处理选举超时和心跳超时即可.<br>观察一下 Raft 结构体的成员, 在 TinyKV 中, 这两个变量是 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code>.<br><code>heartbeatElapsed</code> 对 Leader 而言记录了上次心跳超时以来的 tick 数, 对其他状态无效.<br><code>electionElapsed</code> 对 Leader 和 Candidate 而言, 记录了上次选举超时以来的 tick 数; 对 Follower 而言, 记录了上次收到 Leader 的有效消息以来的 tick 数.</p>
+<p><code>raft.Raft.tick()</code> 中只需要递增这两个值, 然后根据节点的状态处理超时即可. 需要注意的是, 选举超时的时间应该是随机的.</p>
 <ul>
-<li>heartbeatElapsed 记录了上次心跳超时以来的 ticks 数, 只有 leader 会保持这个值, 超时时发送心跳.</li>
-<li>electionElapsed 对 leader 和 candidate 而言, 记录了上次选举超时以来的 ticks 数; 对 follower 而言, 记录了上次收到 leader 的有效消息以来的 ticks 数. 超时时启动选举.</li>
+<li>如果节点是 Leader 并发生了心跳超时 -&gt; 广播心跳.</li>
+<li>如果节点是 Follower 并发生了选举超时 -&gt; 发起选举.</li>
+<li>如果节点是 Candidate 并发生了选举超时 -&gt; 重新发起选举.</li>
 </ul>
-<p>比较合理的做法是在 tick() 方法中递增逻辑时钟并监测超时.</p>
-<p>tick() 方法中,<br>如果当前节点是 leader, 则更新 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code> 的值, 并且检查是否超时.<br>如果超时, 则转换为 candidate 节点.</p>
-<p>如果当前节点是 candidate, 则检查是否超时, 如果超时, 则重新选举.</p>
-<p>如果当前节点是 follower, 则检查是否收到 leader 的有效消息, 如果收到, 则更新 <code>electionElapsed</code> 的值.<br>如果没有收到 leader 的有效消息, 则重新选举. 如果当前节点是 candidate, 则检查是否收到 leader 的有效消息, 如果收到, 则转换为 follower 节点.</p>
-<p>newRaft()</p>
-<p>需要处理的消息类型:</p>
+<p>然后实现状态转换的几种方法, <code>becomeFollower</code>, <code>becomeCandidate</code> 和 <code>becomeLeader</code>.</p>
+<p>接下来需要在 <code>raft.Raft.Step()</code> 中处理 <code>MessageType_MsgRequestVote</code>, <code>MessageType_MsgRequestVoteResponse</code>, <code>MessageType_MsgHup</code> 和 <code>MessageType_MsgBeat</code> 这四种类型的消息.</p>
 <ul>
-<li>MessageType_MsgHup 成为 candidate 并开始选举.</li>
-<li>MessageType_MsgBeat 只有 leader 会接受这个消息, 向所有 peer 广播心跳.</li>
-<li>MessageType_MsgRequestVote</li>
-<li>MessageType_MsgRequestVoteResponse 只有 candidate 会接受这个消息.</li>
+<li><code>MessageType_MsgRequestVote</code><br> 2AA 并不会涉及到 Raft 的日志, 只要根据 term 大小以及自己是否在该任期投票, 返回拒绝或接受即可.<br> 当消息的 term 比自己的更大时, 需要先转变为 Follower, 将自己的 term 设置为消息的 term, Lead 和 Vote 设置为 None, 再判断应该拒绝还是接受.</li>
+<li><code>MessageType_MsgRequestVoteResponse</code><br> 首先将结果添加到记录选票的 <code>raft.Raft.votes</code> 中, 然后统计收到的选票.<br> 如果收到的肯定票更多, 成为 Leader; 如果收到的否定票更多, 成为 Follower; 如果都不是, 直接返回, 等待其他节点的选票.</li>
+<li><code>MessageType_MsgHup</code><br> 测试时发现的消息类型, 收到时节点应该先转变为 Candidate, 然后发起选举.</li>
+<li><code>MessageType_MsgBeat</code><br> 这种消息也是测试时发现的, 收到消息时直接广播心跳.</li>
 </ul>
-</div><h2 id="2AB-Log-replication"><a href="#2AB-Log-replication" class="headerlink" title="2AB Log replication"></a>2AB Log replication</h2><div class="story post-story"><h3 id="Log-replication-相关概念"><a href="#Log-replication-相关概念" class="headerlink" title="Log replication 相关概念"></a>Log replication 相关概念</h3><p>日志的几个 index:</p>
+<p><code>MessageType_MsgHup</code>, <code>MessageType_MsgBeat</code>, 以及 2AB 中会遇到的 <code>MessageType_MsgPropose</code>, 3A 中会遇到的 <code>MessageType_MsgTransferLeader</code> 和 <code>MessageType_MsgTimeoutNow</code> 都是 local message. local message 可以理解为自己发送给自己的消息. 它们都是不带任期的, 即 term 为 0.</p>
+<p>然后需要考虑怎样发送消息. 通过文档我们知道, 在 2A 中我们不需要实际地发送消息, 只需要将它们添加到 <code>raft.Raft.msgs</code> 中即可. 在 TinyKV 中, Raft 层不会直接交互, 而是等待上层来读取并发送消息.</p>
+<p>最后实现 <code>raft.Raft.NewRaft()</code>, 这里没什么好说的. 结构体中不认识的成员设置成默认值, 然后面向测试编程.</p>
+</div><h2 id="2AB-Log-replication"><a href="#2AB-Log-replication" class="headerlink" title="2AB Log replication"></a>2AB Log replication</h2><div class="story post-story"><p>Raft 的日志是一个 entry 数组. 每个 entry 由 index 和 term 唯一标识.</p>
+<p>论文中的这两句话, 描述了日志匹配的特性:</p>
+<blockquote>
 <ul>
-<li>stabled: 已经被持久化的日志的最大 index.</li>
-<li>committed: 已经被提交的日志的最大 index.</li>
-<li>applied: 已经被应用的日志的最大 index.</li>
+<li>如果在不同的日志中的两个条目拥有相同的索引和任期号, 那么他们存储了相同的指令.</li>
+<li>如果在不同的日志中的两个条目拥有相同的索引和任期号, 那么他们之前的所有日志条目也全部相同.</li>
 </ul>
-<p>日志先被 stabled, 再被 commit, 最后被 applied.</p>
-<p>snapshot/first…..applied….committed….stabled…..last</p>
+</blockquote>
+<p>Log replication 是 Raft 达成共识的关键. 在这一步, 我们要实现 Raft 层的 Log replication 部分.</p>
+<h3 id="Log-replication-相关概念"><a href="#Log-replication-相关概念" class="headerlink" title="Log replication 相关概念"></a>Log replication 相关概念</h3><h4 id="日志条目的状态流转"><a href="#日志条目的状态流转" class="headerlink" title="日志条目的状态流转"></a>日志条目的状态流转</h4><p>日志的结构为: snapshot/first…..applied….committed….stabled…..last</p>
+<ul>
+<li>last: 最后一个条目的 index.</li>
+<li>stabled: 已经持久化的条目的最大 index.</li>
+<li>committed: 已经提交的条目的最大 index.</li>
+<li>applied: 已经应用的条目的最大 index.</li>
+<li>first: 第一个条目的 index.</li>
+</ul>
+<p>添加日志时, 先将条目存放在内存中, 此时条目位于 (stable, last] 中,<br>然后由 Peer 层将条目持久化, 此时条目位于 (committed, stabled] 中,<br>再由 Raft 层将条目提交, 表示条目可以被应用, 此时条目位于 (applied, committed] 中,<br>最后由 Peer 层将条目应用, 此时条目位于 [first, applied] 中.</p>
+<h4 id="Leader-为其他节点维护的变量"><a href="#Leader-为其他节点维护的变量" class="headerlink" title="Leader 为其他节点维护的变量"></a>Leader 为其他节点维护的变量</h4><p>Leader 通过 nextIndex 和 matchIndex 来保存其他节点的状态.</p>
+<p>matchIndex 为已知的已经复制到该服务器的最高日志条目的索引.<br>nextIndex 发送到该节点的下一个日志条目的索引.</p>
+<p>每个节点成为 Leader 时, 会将所有其他节点的 nextIndex 初始化为 Leader 的 lastIndex + 1, matchIndex 初始化为 0.</p>
 <h3 id="Log-replication-流程"><a href="#Log-replication-流程" class="headerlink" title="Log replication 流程"></a>Log replication 流程</h3><ol>
-<li>节点成为 leader 时将所有 peer 的 nextIndex 初始化为 lastIndex + 1, 所有 peer 的 matchIndex 初始化为 0.</li>
-<li>接收到 client 请求, 将请求添加到自己的日志中.</li>
-<li>发送 AppendEntries RPC 给所有 peer, 并等待所有 peer 的回复.</li>
-<li></li>
+<li>成为 Leader 时, 初始化所有其他节点的 nextIndex 和 matchIndex.</li>
+<li>向自己的日志中添加一个新条目.</li>
+<li>广播日志.</li>
+<li>接收到 Client 请求时, 将请求作为新条目添加到自己的日志中, 然后广播日志.</li>
+<li>收到心跳 response 时, 如果节点的 matchIndex 小于自己的 lastIndex, 广播日志.</li>
+<li>收到 Append response 时, 如果添加失败, 修改对应节点的 nextIndex 并重试; 如果添加成功, 修改对应节点的 matchIndex 与 nextIndex, 然后计算大多数节点的 matchIndex, 如果比 commit 更大, 推进 commit.</li>
 </ol>
-<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>日志的 index 从 1 开始,</p>
+<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>首先要确定日志条目的存储位置, <code>Raft</code> 结构体中有 <code>RaftLog</code> 这样一个成员变量, <code>RaftLog</code> 中也有一个 storage, 但这个 storage 与 project1 中的 storage</p>
+<p>在 Raft 论文中, 所有日志条目都是持久化的, 在 TinyKV 的实现中, 条目先存放在内存中, 再被持久化, 同时内存中始终保持着日志的副本, 我理解的是, 这里做能够提高效率.</p>
+<p><code>RaftLog</code> 需要我们在 <code>raft.Raft.NewRaft()</code> 中创建, 这里会用到刚提到的 storage.</p>
+<p>需要注意的是, 如果集群中只有 Leader 一个节点, 当它把条目添加到自己的日志中时, 这个条目就可以被 commit 了, Leader 不会向自己发送 Append 消息, 也就不会收到来自自己的 response, 需</p>
+<p>日志的 index 从 1 开始,</p>
 <p>committed, applied, stabled 应该日志的 index 而不是切片的下标.</p>
 </div><h2 id="2AC-Raw-node-interface"><a href="#2AC-Raw-node-interface" class="headerlink" title="2AC Raw node interface"></a>2AC Raw node interface</h2><div class="story post-story"><p>Ready{}<br>Ready 封装了可以读取、持久化、提交的状态.</p>
 <p>Entries: specifies entries to be saved to stable storage BEFORE messages are sent.<br>CommittedEntries: specifies entries to be committed to a store/state-machine.<br>These have previously been committed to stable store.<br>Ready()</p>
@@ -2691,10 +2716,10 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-17T16:04:20+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-19T12:01:58+08:00">
   <a class='notlink'>
     <i class="fa-solid fa-edit fa-fw" aria-hidden="true"></i>
-    <p>更新于：2022年4月17日</p>
+    <p>更新于：2022年4月19日</p>
   </a>
 </div>
 
@@ -2829,13 +2854,13 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
     
   <header>
     
-      <i class="fa-solid fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AA-Leader-election"><span class="toc-text">2AA Leader election</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E6%B5%81%E7%A8%8B"><span class="toc-text">Leader election 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Leader election 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AB-Log-replication"><span class="toc-text">2AB Log replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-text">Log replication 相关概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E6%B5%81%E7%A8%8B"><span class="toc-text">Log replication 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Log replication 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AC-Raw-node-interface"><span class="toc-text">2AC Raw node interface</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AA-Leader-election"><span class="toc-text">2AA Leader election</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E6%B5%81%E7%A8%8B"><span class="toc-text">Leader election 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Leader-election-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Leader election 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AB-Log-replication"><span class="toc-text">2AB Log replication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-text">Log replication 相关概念</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E6%9D%A1%E7%9B%AE%E7%9A%84%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC"><span class="toc-text">日志条目的状态流转</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Leader-%E4%B8%BA%E5%85%B6%E4%BB%96%E8%8A%82%E7%82%B9%E7%BB%B4%E6%8A%A4%E7%9A%84%E5%8F%98%E9%87%8F"><span class="toc-text">Leader 为其他节点维护的变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E6%B5%81%E7%A8%8B"><span class="toc-text">Log replication 流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Log-replication-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Log replication 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2AC-Raw-node-interface"><span class="toc-text">2AC Raw node interface</span></a></li></ol>
     </div>
   </section>
 
@@ -3454,7 +3479,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
 
   function loadSearchScript() {
     // see: layout/_partial/scripts/_ctrl/cdnCtrl.ejs
-    return volantis.js("https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650187321439");
+    return volantis.js("https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650340928837");
   }
 
   function loadSearchService() {
@@ -3751,7 +3776,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"https://moonm3n.github.io/","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://moonm3n.github.io/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"https://moonm3n.github.io/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"TinyKV Project2 RaftKV PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TinyKV Project2 RaftKV PartA","description":"TinyKV Project2 Part A, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-17T08:04:20.223Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":38,"articleSection":"database project","keywords":"TinyKV","image":{"@type":"ImageObject","url":"https://s2.loli.net/2022/04/16/PAkjEigQT2WqBI5.png","width":1024,"height":768}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"https://moonm3n.github.io/","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://moonm3n.github.io/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"https://moonm3n.github.io/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"TinyKV Project2 RaftKV PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TinyKV Project2 RaftKV PartA","description":"TinyKV Project2 Part A, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-19T04:01:58.950Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":38,"articleSection":"database project","keywords":"TinyKV","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 
