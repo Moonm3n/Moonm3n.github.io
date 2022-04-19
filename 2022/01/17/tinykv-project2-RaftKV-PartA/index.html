@@ -44,7 +44,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2022-01-17T07:30:04.000Z">
-<meta property="article:modified_time" content="2022-04-19T04:01:58.950Z">
+<meta property="article:modified_time" content="2022-04-19T07:16:02.799Z">
 <meta property="article:author" content="Yueyang Zhan">
 <meta property="article:tag" content="TinyKV">
 <meta name="twitter:card" content="summary">
@@ -1753,9 +1753,9 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   volantis.GLOBAL_CONFIG ={
     debug: false,
-    cdn: {"js":{"app":"/js/app.80db1a18.js","parallax":"/js/plugins/parallax.8bf0ab10.js","rightMenu":"/js/plugins/rightMenu.1d2dd3e0.js","rightMenus":"/js/plugins/rightMenus.3669cc79.js","sites":"/js/plugins/tags/sites.76bf19b8.js","friends":"/js/plugins/tags/friends.f372da57.js","contributors":"/js/plugins/tags/contributors.aec80453.js","search":"https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650340928837"},"css":{"style":"/css/style.f19b4e92.css"}},
+    cdn: {"js":{"app":"/js/app.80db1a18.js","parallax":"/js/plugins/parallax.8bf0ab10.js","rightMenu":"/js/plugins/rightMenu.1d2dd3e0.js","rightMenus":"/js/plugins/rightMenus.3669cc79.js","sites":"/js/plugins/tags/sites.76bf19b8.js","friends":"/js/plugins/tags/friends.f372da57.js","contributors":"/js/plugins/tags/contributors.aec80453.js","search":"https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650352578985"},"css":{"style":"/css/style.f19b4e92.css"}},
     default: {"avatar":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/avatar/round/3442075.svg","link":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/link/8f277b4ee0ecd.svg","cover":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/cover/76b86c0226ffd.svg","image":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/placeholder/image/2659360.svg"},
-    lastupdate: new Date(1650340928837),
+    lastupdate: new Date(1650352578985),
     sidebar: {
       for_page: ["blogger","category","tagcloud","donate"],
       for_post: ["toc"],
@@ -2586,7 +2586,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <h3 id="Leader-election-流程"><a href="#Leader-election-流程" class="headerlink" title="Leader election 流程"></a>Leader election 流程</h3><p>Raft 算法使用随机计时器来选举 Leader, 集群中通常只有一个 Leader, Leader 会定期向所有其他节点广播心跳来彰显自己的领导权. 节点的状态并不会持久化, 所有节点都是以 Follower 状态启动或重启.</p>
 <p>Leader election 的整体流程为:</p>
 <ol>
-<li>开始选举</li>
+<li>开始选举.</li>
 <li>收到大多数确认选票, 成为 Leader.</li>
 <li>收到大多数否定选票, 成为 Follower.</li>
 <li>收到 Leader 消息, 成为 Follower.</li>
@@ -2670,16 +2670,40 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <li>接收到 Client 请求时, 将请求作为新条目添加到自己的日志中, 然后广播日志.</li>
 <li>收到心跳 response 时, 如果节点的 matchIndex 小于自己的 lastIndex, 广播日志.</li>
 <li>收到 Append response 时, 如果添加失败, 修改对应节点的 nextIndex 并重试; 如果添加成功, 修改对应节点的 matchIndex 与 nextIndex, 然后计算大多数节点的 matchIndex, 如果比 commit 更大, 推进 commit.</li>
+<li>节点收到 Append 消息时, 通过检查消息的 index 与 term 是否与自己的匹配来决定是否接受这些条目.</li>
 </ol>
-<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>首先要确定日志条目的存储位置, <code>Raft</code> 结构体中有 <code>RaftLog</code> 这样一个成员变量, <code>RaftLog</code> 中也有一个 storage, 但这个 storage 与 project1 中的 storage</p>
-<p>在 Raft 论文中, 所有日志条目都是持久化的, 在 TinyKV 的实现中, 条目先存放在内存中, 再被持久化, 同时内存中始终保持着日志的副本, 我理解的是, 这里做能够提高效率.</p>
-<p><code>RaftLog</code> 需要我们在 <code>raft.Raft.NewRaft()</code> 中创建, 这里会用到刚提到的 storage.</p>
-<p>需要注意的是, 如果集群中只有 Leader 一个节点, 当它把条目添加到自己的日志中时, 这个条目就可以被 commit 了, Leader 不会向自己发送 Append 消息, 也就不会收到来自自己的 response, 需</p>
-<p>日志的 index 从 1 开始,</p>
-<p>committed, applied, stabled 应该日志的 index 而不是切片的下标.</p>
-</div><h2 id="2AC-Raw-node-interface"><a href="#2AC-Raw-node-interface" class="headerlink" title="2AC Raw node interface"></a>2AC Raw node interface</h2><div class="story post-story"><p>Ready{}<br>Ready 封装了可以读取、持久化、提交的状态.</p>
-<p>Entries: specifies entries to be saved to stable storage BEFORE messages are sent.<br>CommittedEntries: specifies entries to be committed to a store/state-machine.<br>These have previously been committed to stable store.<br>Ready()</p>
-<p>Advanced()</p>
+<p>更细节的问题:</p>
+<ol>
+<li>节点如何检查消息的 index 与 term?<ol>
+<li>首先判断消息的 index 是否比自己的 lastIndex 更大, 如果是, 说明自己的日志太少了, 无法 Append 这些消息, 在 Raft 中, 日志条目的添加应该是连续的.</li>
+<li>再判断消息的 term 是否与自己的索引为 index 的条目的 term 一致, 如果不是, 说明自己与 Leader 的日志在 [first, index] 存在不一致. Leader 应该发送更早的日志, 让 Follower 覆盖这些不一致.</li>
+<li>最后将消息中的所有条目添加或覆盖到自己的 entries 中.</li>
+</ol>
+</li>
+</ol>
+<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>首先要确定日志条目的存储位置, <code>Raft</code> 结构体中有 <code>RaftLog</code> 这样一个成员变量, 它的主要作用是管理 Raft log. <code>RaftLog</code> 中也有一个 Storage, 但这个 Storage 与 Project1 中的 Storage 不同, Project1 中的 Storage 是整个 TinyKV 存储层的抽象, 这里的 Storage 是 Raft 数据存储的抽象.</p>
+<p>在 Raft 论文中, 所有日志条目都是持久化的, 在 TinyKV 的实现中, 条目先存放在 <code>raft.RaftLog.entries</code> 也就是内存中, 再由上层持久化到 <code>raft.Storage</code> 中, 同时内存中始终保持条目的副本. 这样做应该能够提高读写效率.</p>
+<p>Raft 节点启动时会尝试从 Storage 中获取日志以及节点的状态, 这也是为什么 <code>raft.newLog</code> 需要传入一个 Storage 参数.</p>
+<p>在 2AB 中, 我们需要在 <code>raft.Raft.Step()</code> 中处理一些与日志相关的消息.</p>
+<ul>
+<li><code>MessageType_MsgPropose</code><br> 这也是一种 local message, 表示向 Leader 的日志中添加条目, 只有 Leader 会处理这一消息.<br> 在这里我们首先需要给这些条目设置 index 以及 term. index 从 lastIndex 递增即可, term 为 Leader 的 term.<br> 接着更新关于自己的 matchIndex, 用于推进 commit. 最后广播 Append.</li>
+<li><code>MessageType_MsgAppend</code><br> 在这里按照之前描述的方式, 检查消息的 index 与 term, 然后添加或覆盖即可. 如果消息携带的 commit 比自己的 commit 更大, 推进 commit.</li>
+<li><code>MessageType_MsgAppendResponse</code><br> Append 成功时, 尝试推进 commit; Append 失败时, 重新尝试发送更早的日志.</li>
+<li><code>MessageType_MsgHeartbeat</code><br> 首先根据 term 自己是否需要转变为 Follower, 重制自己的选举超时. 如果消息携带的 commit 比自己的 commit 更大, 推进 commit. 最后返回 response.</li>
+<li><code>MessageType_MsgHeartbeatResponse</code><br> 检查 Follower 的 matchIndex 是否小于自己的 lastIndex, 如果是, 发送 Append.</li>
+</ul>
+<p>需要注意的是:</p>
+<ol>
+<li>如果集群中只有 Leader 一个节点, 当它把条目添加到自己的日志中时, 这个条目就应该被 commit. Leader 不会向自己发送 Append 消息, 也就不会收到来自自己的 Append response, 无法在处理 response 时推进 commit.</li>
+<li>TinyKV 将心跳拆成了 Append 与 Heartbeat 两种消息, 每个消息的职责更加清晰. Append 消息主要用于同步日志, Heartbeat 消息主要用于彰显领导权. Append 消息与 Heartbeat 消息中 commit 的取值是不同的.<ul>
+<li>Follower 接收 Append 消息时会检查 index 与 term, 成功 Append 时, 能够保证自己的日志与 Leader 的日志没有冲突. 所以 Append 消息直接使用 Leader 的 commit 即可.</li>
+<li>Follower 接收 Heartbeat 消息时, 并不会进行上述检查. 如果 Heartbeat 消息直接使用 Leader 的 commit 来推进自己的 commit, 可能会 commit 冲突的条目. 所以 Heartbeat 消息的 commit 需要使用 <code>min(r.RaftLog.committed, r.Prs[to].Match)</code></li>
+</ul>
+</li>
+</ol>
+</div><h2 id="2AC-Raw-node-interface"><a href="#2AC-Raw-node-interface" class="headerlink" title="2AC Raw node interface"></a>2AC Raw node interface</h2><div class="story post-story"><p>在 TinyKV 的架构中, Raft 层并不负责持久化状态, 节点间也不会直接交互, 而是由上层应用定期获取 Raft 层的状态变更以及节点想要发送的消息, 由上层应用来持久化状态和发送消息. RawNode 便是 Raft 层与上层应用的桥梁.</p>
+<p>上层应用通过 <code>raft.RawNode.HasReady()</code> 来判断是否有变更, 通过 <code>raft.RawNode.Ready()</code> 来获取 Raft 层的变更, 再通过 <code>raft.RawNode.Advance()</code> 将上层对 Raft 层的变更应用到 Raft 层.</p>
+<p>这里实现的几个方法相对比较简单.</p>
 
 </div>
   </div>
@@ -2716,7 +2740,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='new-meta-box'>
       
         
-          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-19T12:01:58+08:00">
+          <div class="new-meta-item date" itemprop="dateModified" datetime="2022-04-19T15:16:02+08:00">
   <a class='notlink'>
     <i class="fa-solid fa-edit fa-fw" aria-hidden="true"></i>
     <p>更新于：2022年4月19日</p>
@@ -3479,7 +3503,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
 
   function loadSearchScript() {
     // see: layout/_partial/scripts/_ctrl/cdnCtrl.ejs
-    return volantis.js("https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650340928837");
+    return volantis.js("https://cdn.jsdelivr.net/xxxxxxxx/js/search/hexo.js?time=1650352578985");
   }
 
   function loadSearchService() {
@@ -3776,7 +3800,7 @@ Basic在 Project2 Part A 中我们实现了 Raft 算法的 Leader ...</p>
 
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"https://moonm3n.github.io/","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://moonm3n.github.io/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"https://moonm3n.github.io/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"TinyKV Project2 RaftKV PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TinyKV Project2 RaftKV PartA","description":"TinyKV Project2 Part A, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-19T04:01:58.950Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":38,"articleSection":"database project","keywords":"TinyKV","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Moonm3n's blog","url":"https://moonm3n.github.io/","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/","sameAs":["https://github.com/volantis-x"],"description":""},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://moonm3n.github.io/","name":"Moonm3n's blog"}},{"@type":"ListItem","position":2,"item":{"@id":"https://moonm3n.github.io/categories/database-project/","name":"database project"}},{"@type":"ListItem","position":3,"item":{"@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","name":"TinyKV Project2 RaftKV PartA"}}]},{"@context":"http://schema.org","@type":"BlogPosting","headline":"TinyKV Project2 RaftKV PartA","description":"TinyKV Project2 Part A, 实现基本的 Raft 算法.","datePublished":"2022-01-17T07:30:04.000Z","dateModified":"2022-04-19T07:16:02.799Z","inLanguage":["zh-CN","en","zh-HK","zh-TW","default"],"mainEntityOfPage":{"@type":"WebPage","@id":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/"},"author":{"@type":"Person","name":"Yueyang Zhan","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://moonm3n.github.io/"},"publisher":{"@type":"Organization","name":"Moonm3n's blog","logo":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://moonm3n.github.io/2022/01/17/tinykv-project2-RaftKV-PartA/","wordCount":38,"articleSection":"database project","keywords":"TinyKV","image":{"@type":"ImageObject","url":"https://npm.elemecdn.com/volantis-static@0.0.1649552113628/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 
