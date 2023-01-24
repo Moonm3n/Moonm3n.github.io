@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>15-445 BUFFER POOL</title>
+    <url>/2021/12/14/CMU-15-445-PROJECT-1-BUFFER-POOL/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>database course</category>
+      </categories>
+      <tags>
+        <tag>cmu 15-445</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GFS 论文研读</title>
+    <url>/2021/11/13/GFS-%E8%AE%BA%E6%96%87%E7%A0%94%E8%AF%BB/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>paper</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>OceanBase 数据库大赛</title>
+    <url>/2021/11/25/OceanBase-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%A7%E8%B5%9B/</url>
+    <content><![CDATA[<h1 id="赛题描述"><a href="#赛题描述" class="headerlink" title="赛题描述"></a>赛题描述</h1><p>在开源版本 OceanBase 的基础上, 针对 Nested Loop Join 场景做性能优化. 采用 sysbench 基准测试中 Throughput 的 events/s (eps) 这一项作为排名依据.</p>
+<h1 id="赛题解析"><a href="#赛题解析" class="headerlink" title="赛题解析"></a>赛题解析</h1><h2 id="什么是-Nested-Loop-Join"><a href="#什么是-Nested-Loop-Join" class="headerlink" title="什么是 Nested Loop Join?"></a>什么是 Nested Loop Join?</h2><p>Nested Loop Join 是一种常见的数据库查询操作, 其中两个表的数据量相对较小, 且两个表的关联关系相对较简单.<br>Nested Loop Join 的基本原理是每次从左表获取一行, 然后用这行数据和右表进行 Join. 与右表进行 Join 时, 可以通过索引查询降低复杂度.</p>
+<h2 id="表结构"><a href="#表结构" class="headerlink" title="表结构"></a>表结构</h2><figure class="highlight lua"><table><tr><td class="code"><pre><span class="line"><span class="keyword">local</span> query</span><br><span class="line"></span><br><span class="line">query = <span class="built_in">string</span>.<span class="built_in">format</span>(<span class="string">[[</span></span><br><span class="line"><span class="string">   CREATE TABLE t%d(</span></span><br><span class="line"><span class="string">     c1 int primary key, c2 int, c3 int, v1 CHAR(60), v2 CHAR(60), v3 CHAR(60), v4 CHAR(60), v5 CHAR(60), v6 CHAR(60), v7 CHAR(60), v8 CHAR(60), v9 CHAR(60)</span></span><br><span class="line"><span class="string">     )]]</span>, table_id)</span><br><span class="line"></span><br><span class="line">do_query(drv, con, <span class="string">&quot;create index t2_i1 on t2(c2) local&quot;</span>)</span><br><span class="line">do_query(drv, con, <span class="string">&quot;create index t2_i2 on t2(c3) local&quot;</span>)</span><br><span class="line"></span><br><span class="line">ival = sysbench.rand.default(<span class="number">1</span>, sysbench.opt.table_size)</span><br><span class="line">left_min = ival - <span class="number">100</span>;</span><br><span class="line">left_max = ival + <span class="number">100</span>;</span><br><span class="line">cond = <span class="built_in">string</span>.<span class="built_in">format</span>(<span class="string">&quot;A.c1 &gt;= %d and A.c1 &lt; %d and A.c2 = B.c2 and A.c3 = B.c3&quot;</span>, left_min, left_max)</span><br><span class="line">query = <span class="string">&quot;select /*+ordered use_nl(A,B)*/ * from t1 A, t2 B where &quot;</span> .. cond</span><br></pre></td></tr></table></figure>
+
+<h2 id="查询语句"><a href="#查询语句" class="headerlink" title="查询语句"></a>查询语句</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> 原始查询语句</span><br><span class="line">  <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B </span><br><span class="line">  <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> </span><br><span class="line">  <span class="keyword">and</span> A.c2 <span class="operator">=</span> B.c2 <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> A.c2 <span class="operator">=</span> B.c2 <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br><span class="line">  explain <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> A.c2 <span class="operator">=</span> B.c2 <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br><span class="line"></span><br><span class="line"><span class="number">2.</span> 当 A.c1 <span class="operator">=</span> A.c2 时, 改写后的查询语句</span><br><span class="line">  <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B </span><br><span class="line">  <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> </span><br><span class="line">  <span class="keyword">and</span> B.c2 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> B.c2 <span class="operator">&lt;</span> <span class="number">200</span> </span><br><span class="line">  <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> B.c2 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> B.c2 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br><span class="line">  explain <span class="keyword">select</span> <span class="comment">/*+ordered use_nl(A,B)*/</span> <span class="operator">*</span> <span class="keyword">from</span> t1 A, t2 B <span class="keyword">where</span> A.c1 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> A.c1 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> B.c2 <span class="operator">&gt;=</span> <span class="number">100</span> <span class="keyword">and</span> B.c2 <span class="operator">&lt;</span> <span class="number">200</span> <span class="keyword">and</span> A.c3 <span class="operator">=</span> B.c3;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>paper</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Raft-论文研读</title>
+    <url>/2022/01/17/Raft-%E8%AE%BA%E6%96%87%E7%A0%94%E8%AF%BB/</url>
+    <content><![CDATA[<span id="more"></span>]]></content>
+      <categories>
+        <category>paper</category>
+      </categories>
+      <tags>
+        <tag>Raft</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TiDB-PD</title>
+    <url>/2022/03/22/TiKV-PD/</url>
+    <content><![CDATA[<p>PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.</p>
+<span id="more"></span>
+
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p>PD 是一个逻辑上的单点, 物理上是一个集群, 集成 etcd, 支持故障恢复, 保证了强一致性.<br>PD 功能可以分为三类:</p>
+<ol>
+<li>路由</li>
+<li>元数据管理</li>
+<li>调度</li>
+</ol>
+<p>TiKV 中的 Region Leader 与 Store 会定期向 PD 发送 Heartbeat, Heartbeat 中包含了 Region 和 Store 的各种状态信息,<br>PD 根据状态信息来调度 TiKV 集群的负载均衡, 将 Operator 通过 Heartbeat response 回复给 TiKV.</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="1-Scheduler"><a href="#1-Scheduler" class="headerlink" title="1. Scheduler"></a>1. Scheduler</h3><p>Scheduler 是用来调度资源的接口, 调度器通过状态信息生成 Operator.</p>
+<h3 id="2-Operator"><a href="#2-Operator" class="headerlink" title="2. Operator"></a>2. Operator</h3><p>Operator 是 PD 对 TiKV 的调度操作的集合, 可以由其他 Operator 组合而成.</p>
+<h3 id="3-Selector-Filter"><a href="#3-Selector-Filter" class="headerlink" title="3. Selector/Filter"></a>3. Selector/Filter</h3><p>Selector 与 Filter 负责选择调度操作的 source 与 target.</p>
+<h3 id="4-Controller"><a href="#4-Controller" class="headerlink" title="4. Controller"></a>4. Controller</h3><p>Controller 负责控制整个调度的速度.</p>
+<h3 id="5-Coordinator"><a href="#5-Coordinator" class="headerlink" title="5. Coordinator"></a>5. Coordinator</h3><p>Coordinator 在 Region Heartbeat 会检测 Region 是否需要调度, 如果需要, 则进行调度.</p>
+<p>PD 中有许多调度器, 每个调度器是独立运行的, 有着不同的调度目的.<br>常见的调度器有:</p>
+<ul>
+<li>balance-leader-scheduler: 保持不同节点的 Leader 均衡.</li>
+<li>balance-region-scheduler: 保持不同节点的 Region 均衡.</li>
+<li>hot-region-scheduler: 保持不同节点的读写热点 Region 均衡.</li>
+<li>evict-leader-{store-id}: 驱逐某个节点的所有 Leader.</li>
+</ul>
+<h2 id="调度流程"><a href="#调度流程" class="headerlink" title="调度流程"></a>调度流程</h2><p>调度的流程大体上可以分为三部分:</p>
+<ol>
+<li><p>信息收集<br>Region Leader 周期性地上报 RegionHeartbeat 心跳, 包含了 Region 范围, 副本分布, 副本状态, 数据量, 读写流量等数据.<br>Store 周期性地上报 StoreHeartbeat 心跳, 包含了 Store 的基本信息, 容量, 剩余空间, 读写流量等数据.</p>
+</li>
+<li><p>生成调度</p>
+</li>
+<li><p>执行调度<br>将 Operator Step 下发给对应 Region 的 Leader.</p>
+</li>
+</ol>
+<p>集群的元信息、TSO 信息、Region 信息 持久化在 etcd 中.<br>Store 与 Region 的状态存在 cache 中.</p>
+]]></content>
+      <categories>
+        <category>databases</category>
+      </categories>
+      <tags>
+        <tag>TiDB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>oceanbase-competition-final</title>
+    <url>/2021/12/25/oceanbase-competition-final/</url>
+    <content><![CDATA[<p>doing</p>
+]]></content>
+      <categories>
+        <category>paper</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>TinyKV Project1 StandaloneKV</title>
+    <url>/2022/01/16/tinykv-project1-StandaloneKV/</url>
+    <content><![CDATA[<p>TinyKV Project1, 基于 badger 构造一个单机的支持列族存储的 gRPC 服务.</p>
+<span id="more"></span>
+
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>基于 badger 构造一个单机的支持列族存储的 gRPC 服务.<br>这一服务提供四种基本操作: <code>Put</code>/<code>Delete</code>/<code>Get</code>/<code>Scan</code>.</p>
+<ul>
+<li>Put: 向指定列族中写入.</li>
+<li>Get: 从指定列族中读取.</li>
+<li>Delete: 删除指定列族的指定值.</li>
+<li>Scan: 从指定列族中顺序读取多个值.</li>
+</ul>
+<h2 id="Implement-standalone-storage-engine"><a href="#Implement-standalone-storage-engine" class="headerlink" title="Implement standalone storage engine"></a>Implement standalone storage engine</h2><h3 id="题目解析"><a href="#题目解析" class="headerlink" title="题目解析"></a>题目解析</h3><p>在这一步中我们要实现 Storage 接口的一个实现类 StandAloneStorage, 在 TinyKV 中, Storage 接口有三个实现类: MemStorage, RaftStorage 和 StandAloneStorage.</p>
+<h4 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h4><p>Storage 可以理解为存储层的抽象, 提供 <code>Start()</code>, <code>Stop()</code>, <code>Write()</code>, <code>Reader()</code> 四种方法.</p>
+<ul>
+<li><code>Start()</code> 与 <code>Stop()</code> 方法只有 RaftStorage 类会用到, 用于启动/停止底层 Raft 节点, 题目中也没有要求我们实现这两个方法. ( 感觉 <code>Start()</code> 与 <code>Stop()</code> 方法中的两行 <code>// Your Code Here (1).</code> 应该删掉 )</li>
+<li><code>Write()</code> 方法向存储层中写入变更, 变更的类型可以是 Put 或 Delete.</li>
+<li><code>Reader()</code> 方法返回一个 StorageReader 类, 提供 <code>GetCF()</code>, <code>IterCF()</code>, <code>Close()</code> 三种方法.<br>总的来说, Storage 提供 <code>Write()</code>, <code>GetCF()</code> 和 <code>IterCF()</code> 三种操作数据的方法.</li>
+</ul>
+<h5 id="MemStorage"><a href="#MemStorage" class="headerlink" title="MemStorage"></a>MemStorage</h5><p>MemStorage 是 Storage 的纯内存实现, 硬编码了三个列族: CfDefault, CfLock 和 CfWrite. 每个列族是一颗红黑树,<br><code>Write()</code>, <code>GetCF()</code>, <code>IterCF()</code> 直接调用了红黑树的 <code>ReplaceOrInsert(item)</code>、<code>Delete(item)</code>、<code>Get(item)</code> 方法.</p>
+<p>Project 4 测试时使用的 Storage 便是 MemStorage.</p>
+<h5 id="RaftStorage"><a href="#RaftStorage" class="headerlink" title="RaftStorage"></a>RaftStorage</h5><p>RaftStorage 是 Storage 的分布式实现. 当我们 Run TinyKV with TinySQL 时, 默认会使用这个 Storage.</p>
+<h5 id="StandAloneStorage"><a href="#StandAloneStorage" class="headerlink" title="StandAloneStorage"></a>StandAloneStorage</h5><p>StandAloneStorage 是 Storage 的单机实现, 我们要实现的便是它.</p>
+<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><p>看了题目之后一脸懵逼, 还好 Storage 接口还有其他两个实现类 MemStorage 与 RaftStorage.</p>
+<p>读了读它们的代码, 题目中要求基于 badger key/value API, 而 MemStorage 使用的是红黑树, 只能参考一下 <code>Write()</code> 时处理 <code>Modify</code> 的方法, 其他部分没有参考价值.<br>还剩下 RaftStorage , RaftStorage <code>Start()</code> 时根据 config 新建了一些 client 和 worker 并启动, <code>Stop()</code> 时将它们停止.<br><code>Write()</code> 时, RaftStorage 将 <code>Modify</code> 转换为 <code>Put</code> 或 <code>Delete</code>, 然后将它们打包成 request 发送到 Raft 层. 这里并没有写入 badger 相关的代码.<br><code>GetCF()</code> 时, RaftStorage 直接调用 <code>engine_util</code> 中的方法在 badger 中读取, <code>IterCF()</code> 也类似.<br>看了看 <code>engine_util</code> 中的方法, 原来题目中提到的 badger 的操作都在这, 接下来怎么写就比较清晰了.</p>
+<p>StandAloneStorage 的 <code>Write()</code> 方法只要将 <code>Modify</code> 解析为 <code>Put</code> 或 <code>Delete</code>, 再调用 <code>engine_util</code> 中的方法写入或删除就可以了.<br><code>Reader()</code> 方法只要新建一个事务, 再新建一个类似 <code>RegionReader</code> 的 Reader 即可.<br>Reader <code>Close()</code> 时记得调用 <code>Discard()</code> 方法结束事务.</p>
+<h2 id="Implement-service-handlers"><a href="#Implement-service-handlers" class="headerlink" title="Implement service handlers"></a>Implement service handlers</h2><h3 id="题目解析-1"><a href="#题目解析-1" class="headerlink" title="题目解析"></a>题目解析</h3><p>在上一步我们实现了 StandAloneStorage, 但它的接口和题目中咱们的最终目标 <code>Put</code>/<code>Delete</code>/<code>Get</code>/<code>Scan</code> 还不太一样,<br>在这一步中我们要利用 StandAloneStorage 实现 <code>RawPut</code>/<code>RawDelete</code>/<code>RawGet</code>/<code>RawScan</code> 这四个方法, 处理 request, 返回对应的 response.</p>
+<h3 id="实现思路-1"><a href="#实现思路-1" class="headerlink" title="实现思路"></a>实现思路</h3><p>要实现的四个方法属于 Server 这个类, Server 类中正好有 Storage 这一属性, 这算是衔接上了.<br>Region 是 Multi-Raft 中的一个概念, 在这一步中我们还没有涉及到 Raft, 不知道为什么类似 <code>RawGetResponse</code> 这样的类中会有 <code>RegionError</code> 这样的属性, 还是先忽略吧.</p>
+<h4 id="RawGet"><a href="#RawGet" class="headerlink" title="RawGet"></a>RawGet</h4><p>从 Storage 中获取 Reader, 再调用 Reader 的 <code>GetCF</code> 即可. 注意出错时要将错误信息赋值给 <code>response.Error</code>, 没找到结果时要将 <code>response.NotFound</code> 设置为 True.</p>
+<h4 id="RawPut-amp-RawDelete"><a href="#RawPut-amp-RawDelete" class="headerlink" title="RawPut &amp; RawDelete"></a>RawPut &amp; RawDelete</h4><p>先构建 <code>Modify</code>, 再调用 Storage 的 <code>Write</code> 方法即可.</p>
+<h4 id="RawScan"><a href="#RawScan" class="headerlink" title="RawScan"></a>RawScan</h4><p>从 Storage 中获取 Reader, 再从 Reader 中获取 Iter, Seek 到对应的 Key 读取最多 Limit 个值即可.</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="在-macOS-上切换-go-版本"><a href="#在-macOS-上切换-go-版本" class="headerlink" title="在 macOS 上切换 go 版本"></a>在 macOS 上切换 go 版本</h3><p>用 1.17.5 版本的 go 运行 project 时会有奇怪的 error<br><code>fatal error: unexpected signal during runtime execution</code>.<br>看了一下 issues 应该是 go 版本的锅, 降级到 1.16.x 便可.</p>
+<p>在 macOS 中使用 brew 可以方便地管理软件的版本.</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装 go</span></span><br><span class="line">brew install go</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装 go 1.16</span></span><br><span class="line">brew install go@1.16</span><br><span class="line"><span class="meta">#</span><span class="bash"> 切换到 go 1.16</span></span><br><span class="line">brew unlink go</span><br><span class="line">brew link go@1.16</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>database project</category>
+      </categories>
+      <tags>
+        <tag>TinyKV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TinyKV Project2 RaftKV PartA</title>
+    <url>/2022/01/17/tinykv-project2-RaftKV-PartA/</url>
+    <content><![CDATA[<p>TinyKV Project2 Part A, 实现基本的 Raft 算法.</p>
+<span id="more"></span>
+
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>实现基本的 Raft 算法, 包括 Leader election 和 Log replication.</p>
+<h2 id="2AA-Leader-election"><a href="#2AA-Leader-election" class="headerlink" title="2AA Leader election"></a>2AA Leader election</h2><p>Raft 算法中有三种状态, Leader, Candidate 和 Follower. Leader 负责处理所有的 Client 请求, Follower 只被动地响应 Leader 或 Candidate 的请求. Candidate 负责发起选举并处理选举结果.<br>Raft 算法中的状态及状态间的转换关系如下图所示:<br><img src="https://moonm3n-img.oss-cn-chengdu.aliyuncs.com/img/raft-state-transition.jpg" alt="raft-state-transition"><br>在这一步, 我们要实现 Raft 层的 Leader election 部分.</p>
+<h3 id="Leader-election-流程"><a href="#Leader-election-流程" class="headerlink" title="Leader election 流程"></a>Leader election 流程</h3><p>Raft 算法使用随机计时器来选举 Leader, 集群中通常只有一个 Leader, Leader 会定期向所有其他节点广播心跳来彰显自己的领导权. 节点的状态并不会持久化, 所有节点都是以 Follower 状态启动或重启.</p>
+<p>Leader election 的整体流程为:</p>
+<ol>
+<li>开始选举.</li>
+<li>收到大多数确认选票, 成为 Leader.</li>
+<li>收到大多数否定选票, 成为 Follower.</li>
+<li>收到 Leader 消息, 成为 Follower.</li>
+<li>超时重新开始选举.</li>
+</ol>
+<p>更细节的问题:</p>
+<ol>
+<li>什么时候开始选举?<ul>
+<li>总的来说, 当一个节点认为集群中没有 Leader 或者 Leader 已经宕机时, 它会转变为 Candidate 并发起选举. 只有 Candidate 才能发起选举.<ul>
+<li>对 Follower 而言, 在超时时间内没有收到来自 Leader 的心跳, 或者没有给 Candidate 投票时, 它会转变为 Candidate 并发起选举. 收到来自 Leader 的心跳说明集群中存在正在运行的 Leader, 投票给 Candidate 说明 Follower 认可该节点成为 Leader.</li>
+<li>对 Candidate 而言, 在超时时间内没有收到足够的确认选票时, 它会自增 term 再次开始选举.</li>
+<li>对 Leader 而言, 除非发现了集群中有 term 更高的 Leader 存在, 否则它不会放弃自己的领导权. Leader 不会转变为 Candidate, 也就不会发起选举.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Candidate 怎样开始选举?<ol>
+<li>节点转变为 Candidate 后首先自增 term.</li>
+<li>为自己投票.</li>
+<li>重制选举超时计时器.</li>
+<li>发送请求投票的 RPC 给其他所有服务器.</li>
+</ol>
+</li>
+<li>Candidate 怎样结束选举?<ul>
+<li>接收到大多数节点的确认选票, 转变为 Leader 并立即向其他节点发送心跳.</li>
+<li>发现了其他 Leader, 且这个 Leader 的 term <strong>不小于</strong> 自己的 term.</li>
+<li>选举超时, Candidate 会再次自增 term, 然后重新选举.</li>
+</ul>
+</li>
+<li>节点怎样投票?<ol>
+<li>每个节点每个 term 只会给一个节点投票, 再收到其他节点的 RequestVote 时, 直接拒绝.</li>
+<li>申请选票的 Candidate 必须有更高的 term, 否则拒绝.</li>
+<li>申请选票的 Candidate 必须有更新的日志, 否则拒绝.</li>
+</ol>
+</li>
+</ol>
+<h3 id="Leader-election-实现"><a href="#Leader-election-实现" class="headerlink" title="Leader election 实现"></a>Leader election 实现</h3><p>根据文档的描述, 我们首先从 <code>raft.Raft.tick()</code> 开始.</p>
+<p><code>raft.Raft.tick()</code> 的作用是递增逻辑时钟, 从而驱动选举超时或心跳超时. Raft 根据 term 来判断消息是否过期, 不需要比较消息发送时的逻辑时间, 因此, 不需要一个变量来记录实际的逻辑时间, 只需要用两个变量来处理选举超时和心跳超时即可.<br>观察一下 Raft 结构体的成员, 在 TinyKV 中, 这两个变量是 <code>heartbeatElapsed</code> 和 <code>electionElapsed</code>.<br><code>heartbeatElapsed</code> 对 Leader 而言记录了上次心跳超时以来的 tick 数, 对其他状态无效.<br><code>electionElapsed</code> 对 Leader 和 Candidate 而言, 记录了上次选举超时以来的 tick 数; 对 Follower 而言, 记录了上次收到 Leader 的有效消息以来的 tick 数.</p>
+<p><code>raft.Raft.tick()</code> 中只需要递增这两个值, 然后根据节点的状态处理超时即可. 需要注意的是, 选举超时的时间应该是随机的.</p>
+<ul>
+<li>如果节点是 Leader 并发生了心跳超时 -&gt; 广播心跳.</li>
+<li>如果节点是 Follower 并发生了选举超时 -&gt; 发起选举.</li>
+<li>如果节点是 Candidate 并发生了选举超时 -&gt; 重新发起选举.</li>
+</ul>
+<p>然后实现状态转换的几种方法, <code>becomeFollower</code>, <code>becomeCandidate</code> 和 <code>becomeLeader</code>.</p>
+<p>接下来需要在 <code>raft.Raft.Step()</code> 中处理 <code>MessageType_MsgRequestVote</code>, <code>MessageType_MsgRequestVoteResponse</code>, <code>MessageType_MsgHup</code> 和 <code>MessageType_MsgBeat</code> 这四种类型的消息.</p>
+<ul>
+<li><code>MessageType_MsgRequestVote</code><br> 2AA 并不会涉及到 Raft 的日志, 只要根据 term 大小以及自己是否在该任期投票, 返回拒绝或接受即可.<br> 当消息的 term 比自己的更大时, 需要先转变为 Follower, 将自己的 term 设置为消息的 term, Lead 和 Vote 设置为 None, 再判断应该拒绝还是接受.</li>
+<li><code>MessageType_MsgRequestVoteResponse</code><br> 首先将结果添加到记录选票的 <code>raft.Raft.votes</code> 中, 然后统计收到的选票.<br> 如果收到的肯定票更多, 成为 Leader; 如果收到的否定票更多, 成为 Follower; 如果都不是, 直接返回, 等待其他节点的选票.</li>
+<li><code>MessageType_MsgHup</code><br> 测试时发现的消息类型, 收到时节点应该先转变为 Candidate, 然后发起选举.</li>
+<li><code>MessageType_MsgBeat</code><br> 这种消息也是测试时发现的, 收到消息时直接广播心跳.</li>
+</ul>
+<p><code>MessageType_MsgHup</code>, <code>MessageType_MsgBeat</code>, 以及 2AB 中会遇到的 <code>MessageType_MsgPropose</code>, 3A 中会遇到的 <code>MessageType_MsgTransferLeader</code> 和 <code>MessageType_MsgTimeoutNow</code> 都是 local message. local message 可以理解为自己发送给自己的消息. 它们都是不带任期的, 即 term 为 0.</p>
+<p>然后需要考虑怎样发送消息. 通过文档我们知道, 在 2A 中我们不需要实际地发送消息, 只需要将它们添加到 <code>raft.Raft.msgs</code> 中即可. 在 TinyKV 中, Raft 层不会直接交互, 而是等待上层来读取并发送消息.</p>
+<p>最后实现 <code>raft.Raft.NewRaft()</code>, 这里没什么好说的. 结构体中不认识的成员设置成默认值, 然后面向测试编程.</p>
+<h2 id="2AB-Log-replication"><a href="#2AB-Log-replication" class="headerlink" title="2AB Log replication"></a>2AB Log replication</h2><p>Raft 的日志是一个 entry 数组. 每个 entry 由 index 和 term 唯一标识.</p>
+<p>论文中的这两句话, 描述了日志匹配的特性:</p>
+<blockquote>
+<ul>
+<li>如果在不同的日志中的两个条目拥有相同的索引和任期号, 那么他们存储了相同的指令.</li>
+<li>如果在不同的日志中的两个条目拥有相同的索引和任期号, 那么他们之前的所有日志条目也全部相同.</li>
+</ul>
+</blockquote>
+<p>Log replication 是 Raft 达成共识的关键. 在这一步, 我们要实现 Raft 层的 Log replication 部分.</p>
+<h3 id="Log-replication-相关概念"><a href="#Log-replication-相关概念" class="headerlink" title="Log replication 相关概念"></a>Log replication 相关概念</h3><h4 id="日志条目的状态流转"><a href="#日志条目的状态流转" class="headerlink" title="日志条目的状态流转"></a>日志条目的状态流转</h4><p>日志的结构为: snapshot/first…..applied….committed….stabled…..last</p>
+<ul>
+<li>last: 最后一个条目的 index.</li>
+<li>stabled: 已经持久化的条目的最大 index.</li>
+<li>committed: 已经提交的条目的最大 index.</li>
+<li>applied: 已经应用的条目的最大 index.</li>
+<li>first: 第一个条目的 index.</li>
+</ul>
+<p>添加日志时, 先将条目存放在内存中, 此时条目位于 (stable, last] 中,<br>然后由 Peer 层将条目持久化, 此时条目位于 (committed, stabled] 中,<br>再由 Raft 层将条目提交, 表示条目可以被应用, 此时条目位于 (applied, committed] 中,<br>最后由 Peer 层将条目应用, 此时条目位于 [first, applied] 中.</p>
+<h4 id="Leader-为其他节点维护的变量"><a href="#Leader-为其他节点维护的变量" class="headerlink" title="Leader 为其他节点维护的变量"></a>Leader 为其他节点维护的变量</h4><p>Leader 通过 nextIndex 和 matchIndex 来保存其他节点的状态.</p>
+<p>matchIndex 为已知的已经复制到该服务器的最高日志条目的索引.<br>nextIndex 发送到该节点的下一个日志条目的索引.</p>
+<p>每个节点成为 Leader 时, 会将所有其他节点的 nextIndex 初始化为 Leader 的 lastIndex + 1, matchIndex 初始化为 0.</p>
+<h3 id="Log-replication-流程"><a href="#Log-replication-流程" class="headerlink" title="Log replication 流程"></a>Log replication 流程</h3><ol>
+<li>成为 Leader 时, 初始化所有其他节点的 nextIndex 和 matchIndex.</li>
+<li>向自己的日志中添加一个新条目.</li>
+<li>广播日志.</li>
+<li>接收到 Client 请求时, 将请求作为新条目添加到自己的日志中, 然后广播日志.</li>
+<li>收到心跳 response 时, 如果节点的 matchIndex 小于自己的 lastIndex, 广播日志.</li>
+<li>收到 Append response 时, 如果添加失败, 修改对应节点的 nextIndex 并重试; 如果添加成功, 修改对应节点的 matchIndex 与 nextIndex, 然后计算大多数节点的 matchIndex, 如果比 commit 更大, 推进 commit.</li>
+<li>节点收到 Append 消息时, 通过检查消息的 index 与 term 是否与自己的匹配来决定是否接受这些条目.</li>
+</ol>
+<p>更细节的问题:</p>
+<ol>
+<li>节点如何检查消息的 index 与 term?<ol>
+<li>首先判断消息的 index 是否比自己的 lastIndex 更大, 如果是, 说明自己的日志太少了, 无法 Append 这些消息, 在 Raft 中, 日志条目的添加应该是连续的.</li>
+<li>再判断消息的 term 是否与自己的索引为 index 的条目的 term 一致, 如果不是, 说明自己与 Leader 的日志在 [first, index] 存在不一致. Leader 应该发送更早的日志, 让 Follower 覆盖这些不一致.</li>
+<li>最后将消息中的所有条目添加或覆盖到自己的 entries 中.</li>
+</ol>
+</li>
+</ol>
+<h3 id="Log-replication-实现"><a href="#Log-replication-实现" class="headerlink" title="Log replication 实现"></a>Log replication 实现</h3><p>首先要确定日志条目的存储位置, <code>Raft</code> 结构体中有 <code>RaftLog</code> 这样一个成员变量, 它的主要作用是管理 Raft log. <code>RaftLog</code> 中也有一个 Storage, 但这个 Storage 与 Project1 中的 Storage 不同, Project1 中的 Storage 是整个 TinyKV 存储层的抽象, 这里的 Storage 是 Raft 数据存储的抽象.</p>
+<p>在 Raft 论文中, 所有日志条目都是持久化的, 在 TinyKV 的实现中, 条目先存放在 <code>raft.RaftLog.entries</code> 也就是内存中, 再由上层持久化到 <code>raft.Storage</code> 中, 同时内存中始终保持条目的副本. 这样做应该能够提高读写效率.</p>
+<p>Raft 节点启动时会尝试从 Storage 中获取日志以及节点的状态, 这也是为什么 <code>raft.newLog</code> 需要传入一个 Storage 参数.</p>
+<p>在 2AB 中, 我们需要在 <code>raft.Raft.Step()</code> 中处理一些与日志相关的消息.</p>
+<ul>
+<li><code>MessageType_MsgPropose</code><br> 这也是一种 local message, 表示向 Leader 的日志中添加条目, 只有 Leader 会处理这一消息.<br> 在这里我们首先需要给这些条目设置 index 以及 term. index 从 lastIndex 递增即可, term 为 Leader 的 term.<br> 接着更新关于自己的 matchIndex, 用于推进 commit. 最后广播 Append.</li>
+<li><code>MessageType_MsgAppend</code><br> 在这里按照之前描述的方式, 检查消息的 index 与 term, 然后添加或覆盖即可. 如果消息携带的 commit 比自己的 commit 更大, 推进 commit.</li>
+<li><code>MessageType_MsgAppendResponse</code><br> Append 成功时, 尝试推进 commit; Append 失败时, 重新尝试发送更早的日志.</li>
+<li><code>MessageType_MsgHeartbeat</code><br> 首先根据 term 自己是否需要转变为 Follower, 重制自己的选举超时. 如果消息携带的 commit 比自己的 commit 更大, 推进 commit. 最后返回 response.</li>
+<li><code>MessageType_MsgHeartbeatResponse</code><br> 检查 Follower 的 matchIndex 是否小于自己的 lastIndex, 如果是, 发送 Append.</li>
+</ul>
+<p>需要注意的是:</p>
+<ol>
+<li>如果集群中只有 Leader 一个节点, 当它把条目添加到自己的日志中时, 这个条目就应该被 commit. Leader 不会向自己发送 Append 消息, 也就不会收到来自自己的 Append response, 无法在处理 response 时推进 commit.</li>
+<li>TinyKV 将心跳拆成了 Append 与 Heartbeat 两种消息, 每个消息的职责更加清晰. Append 消息主要用于同步日志, Heartbeat 消息主要用于彰显领导权. Append 消息与 Heartbeat 消息中 commit 的取值是不同的.<ul>
+<li>Follower 接收 Append 消息时会检查 index 与 term, 成功 Append 时, 能够保证自己的日志与 Leader 的日志没有冲突. 所以 Append 消息直接使用 Leader 的 commit 即可.</li>
+<li>Follower 接收 Heartbeat 消息时, 并不会进行上述检查. 如果 Heartbeat 消息直接使用 Leader 的 commit 来推进自己的 commit, 可能会 commit 冲突的条目. 所以 Heartbeat 消息的 commit 需要使用 <code>min(r.RaftLog.committed, r.Prs[to].Match)</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="2AC-Raw-node-interface"><a href="#2AC-Raw-node-interface" class="headerlink" title="2AC Raw node interface"></a>2AC Raw node interface</h2><p>在 TinyKV 的架构中, Raft 层并不负责持久化状态, 节点间也不会直接交互, 而是由上层应用定期获取 Raft 层的状态变更以及节点想要发送的消息, 由上层应用来持久化状态和发送消息. RawNode 便是 Raft 层与上层应用的桥梁.</p>
+<p>上层应用通过 <code>raft.RawNode.HasReady()</code> 来判断是否有变更, 通过 <code>raft.RawNode.Ready()</code> 来获取 Raft 层的变更, 再通过 <code>raft.RawNode.Advance()</code> 将上层对 Raft 层的变更应用到 Raft 层.</p>
+<p>这里实现的几个方法相对比较简单.</p>
+]]></content>
+      <categories>
+        <category>database project</category>
+      </categories>
+      <tags>
+        <tag>TinyKV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TinyKV Project2 RaftKV PartB</title>
+    <url>/2022/02/03/tinykv-project2-RaftKV-PartB/</url>
+    <content><![CDATA[<p>TinyKV Project2 Part B, 利用 Raft 模块构建容错的 KV 存储服务.</p>
+<span id="more"></span>
+
+<h2 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h2><p>在 Project2 Part A 中我们实现了 Raft 算法的 Leader election 和 Log replication 部分. 也实现了 Ready 相关的几个函数, 能够抽取 Raft 层的变更信息. 整个 2A 的主要工作都是在 Raft 层. 在 Project2 Part B 中, 我们把 KV 存储引擎用作 Raft 中的状态机, 将 Client 的请求作为日志, 扩展出一个容错的 KV 存储服务.</p>
+<p>首先需要了解几个基本的概念:</p>
+<ul>
+<li>Store: 一个 tinykv-server.</li>
+<li>Peer: tinykv-server 中运行的一个 Raft node, 一个 Store 上可能运行有多个 Peer, 每个 Peer 所属于不同的 Region, 在 2B 中, 只会涉及到一个 Region.</li>
+<li>Region: Raft group.</li>
+</ul>
+<h2 id="Implement-peer-storage"><a href="#Implement-peer-storage" class="headerlink" title="Implement peer storage"></a>Implement peer storage</h2><p>在这一步中, 我们需要将 Raft 层的状态持久化.</p>
+<p>Raft 论文中提到的需要持久化的状态有:</p>
+<ol>
+<li>currentTerm: 节点当前的任期, 既 HardState 中的 Term.</li>
+<li>votedFor: 节点给谁投了票, 既 HardState 中的 Vote. 如果不持久化 Vote, 节点投票后重启会产生一个节点在一个 Term 中投出两张票的现象.</li>
+<li>log[]: 节点当前的日志.</li>
+</ol>
+<p>与 Raft 论文不同, tinykv 中还需要将 Commit 和 Region 信息持久化. tinykv 中的绝大多数 request 都是幂等的.</p>
+<p>具体到代码中, 我们需要实现 SaveReadyState() 与 Append() 两个函数, 2B 中并不涉及快照, ApplySnapshot() 函数暂时不需要实现.</p>
+<h2 id="Implement-Raft-ready-process"><a href="#Implement-Raft-ready-process" class="headerlink" title="Implement Raft ready process"></a>Implement Raft ready process</h2><p>HandleRaftReady</p>
+<ol>
+<li>get the ready from Raft module.</li>
+<li>persisting log entries.</li>
+<li>applying committed entries.</li>
+<li>sending Raft message to other peers.</li>
+</ol>
+<h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><h3 id="1-panic-find-no-region-for-30203030303030303030"><a href="#1-panic-find-no-region-for-30203030303030303030" class="headerlink" title="1. panic: find no region for 30203030303030303030"></a>1. panic: find no region for 30203030303030303030</h3><p>raft.go newRaft()<br>优先使用 storage 中的 confState.Nodes 的值.</p>
+<h3 id="2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1"><a href="#2-panic-runtime-error-index-out-of-range-18446744073709551611-with-length-1" class="headerlink" title="2. panic: runtime error: index out of range [18446744073709551611] with length 1"></a>2. panic: runtime error: index out of range [18446744073709551611] with length 1</h3><p>raft.go sendAppend()<br>index 处理有问题</p>
+<h3 id="3-空指针"><a href="#3-空指针" class="headerlink" title="3. 空指针"></a>3. 空指针</h3><p>snap 的 response 需要携带 Region, cd 的 Txn 需要赋值, 否则会出现空指针异常.</p>
+<h3 id="4-can’t-call-command-header-on-leader-n"><a href="#4-can’t-call-command-header-on-leader-n" class="headerlink" title="4. can’t call command header on leader n"></a>4. can’t call command header on leader n</h3><p>WaitRespWithTimeout 超时了.<br>router.peerSender 管道满了<br>不停地向 router.peerSender 中发送消息, 导致管道堵塞, 引发卡死.<br>Ready() 函数里没有清空 msg.</p>
+<h3 id="5-panic-region-1-2-unexpected-raft-log-index"><a href="#5-panic-region-1-2-unexpected-raft-log-index" class="headerlink" title="5. panic: [region 1] 2 unexpected raft log index"></a>5. panic: [region 1] 2 unexpected raft log index</h3><p>— FAIL: TestPersistPartition2B (27.40s)<br>panic: [region 1] 2 unexpected raft log index: lastIndex 33539 &lt; appliedIndex 33810 [recovered]</p>
+<p>看起来像是 lastIndex 持久化的逻辑有问题, 重启节点时监测到 lastIndex 比 appliedIndex 更小, 引发 panic.<br>修改了持久化的逻辑后变成了偶现 bug, 1% 几率出现. 修复问题 6 后消失.</p>
+<h3 id="6-panic-runtime-error-index-out-of-range-1091-with-length-1087"><a href="#6-panic-runtime-error-index-out-of-range-1091-with-length-1087" class="headerlink" title="6. panic: runtime error: index out of range [1091] with length 1087"></a>6. panic: runtime error: index out of range [1091] with length 1087</h3><p>偶现 bug, 3% 几率出现.<br>bug 出现时, 这两个 index 的差值绝大多数时候为 5, length 为 1087 时, 最后一个元素应该是 [1086].<br>看了日志, 在 partition 情况下才会发生. leader progress 里存储的 next 比自身的 lastIndex 大了更多.<br>加日志后实锤, append entries 返回了大于 leader.lastIndex 的 index, leader 用这个 index 更新了 next,<br>于是出现了数组越界.</p>
+<p>错误原因:<br>becomeFollower 时将 Vote 设置为了 None, partition 后有可能选出两个 Leader.</p>
+<h3 id="7-panic-len-resp-Responses-1"><a href="#7-panic-len-resp-Responses-1" class="headerlink" title="7. panic: len(resp.Responses) != 1"></a>7. panic: len(resp.Responses) != 1</h3><p>偶现 bug, 1% 几率出现.<br>panic: len(resp.Responses) != 1</p>
+<p>goroutine 439 [running]:<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPutCF(0xc00011f5c0, 0x47f01a0, 0x7, 0xc22a37f5d0, 0xa, 0x10, 0xc22a37f5e0, 0x9, 0x10)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:308 +0x24d<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.(*Cluster).MustPut(…)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/cluster.go:298<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.GenericTest.func1(0x1, 0xc000001e00)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:211 +0x41f<br>github.com/pingcap-incubator/tinykv/kv/test_raftstore.runClient(0xc000001e00, 0x1, 0xc21c12fb60, 0xc21e28acf0)<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:27 +0x7a<br>created by github.com/pingcap-incubator/tinykv/kv/test_raftstore.SpawnClientsAndWait<br>    /Users/moon/GolandProjects/tinykv/kv/test_raftstore/test_test.go:37 +0xb2<br>FAIL    github.com/pingcap-incubator/tinykv/kv/test_raftstore    23.630s<br>FAIL<br>rm -rf /tmp/<em>test-raftstore</em></p>
+<p>修复问题 6 后消失.</p>
+]]></content>
+      <categories>
+        <category>database project</category>
+      </categories>
+      <tags>
+        <tag>TinyKV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TinyKV Project2 RaftKV PartC</title>
+    <url>/2022/02/24/tinykv-project2-RaftKV-PartC/</url>
+    <content><![CDATA[<p>TinyKV Project2 Part C, 实现快照机制, 定期对日志进行压缩.</p>
+<span id="more"></span>
+
+<p>snapshot 的实现分为两个部分.</p>
+<ol>
+<li>实现日志的定期清理.</li>
+<li>实现 snapshot 数据的发送.</li>
+</ol>
+<h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><h3 id="1-panic-requested-entry-at-index-is-unavailable"><a href="#1-panic-requested-entry-at-index-is-unavailable" class="headerlink" title="1. panic: requested entry at index is unavailable"></a>1. panic: requested entry at index is unavailable</h3><p>这个错误发生在节点重启, 从 storage 中恢复 entries 时.</p>
+<p>debug 发现 storage 中仅存储了 lo 所在的那一个 entry, 没有 lo 到 hi 之间的 entries.<br>回归测试 2b 后发现也出现了这个问题, 应该是写 2c 时影响到了.</p>
+<p>修改 SaveRaftReady() 中应用 snapshot 和 append entries 的顺序后修复.</p>
+<h3 id="2-FAIL-TestSnapshotUnreliableRecoverConcurrentPartition2C"><a href="#2-FAIL-TestSnapshotUnreliableRecoverConcurrentPartition2C" class="headerlink" title="2. FAIL: TestSnapshotUnreliableRecoverConcurrentPartition2C"></a>2. FAIL: TestSnapshotUnreliableRecoverConcurrentPartition2C</h3><p>没有任何错误提示.<br>看日志发现 leader 在不停地 send append.<br>debug 发现 first index 小于 truncated index 了, 怀疑 truncated index 或者 first index 的持久化有问题.<br>debug 发现 send snapshot 的逻辑有问题, 无法发送 snapshot.</p>
+<h3 id="3-FAIL-panic-runtime-error-slice-bounds-out-of-range-1186-384"><a href="#3-FAIL-panic-runtime-error-slice-bounds-out-of-range-1186-384" class="headerlink" title="3. FAIL: panic: runtime error: slice bounds out of range [1186:384]"></a>3. FAIL: panic: runtime error: slice bounds out of range [1186:384]</h3><p>更改 raft log 的 first index 时没有修改 entries 数组, 导致 从 entries 数组中取 entry 的逻辑出错.</p>
+<h3 id="4-panic-Key-not-found"><a href="#4-panic-Key-not-found" class="headerlink" title="4. panic: Key not found"></a>4. panic: Key not found</h3><p>leader 请求生成 snapshot 后分区恢复, 出现了新 leader, 新 leader 再次请求 snapshot 时便会触发这个问题.<br>apply snapshot 时 WriteRegionState 后解决.</p>
+<h3 id="5-panic-request-timeout"><a href="#5-panic-request-timeout" class="headerlink" title="5. panic: request timeout"></a>5. panic: request timeout</h3><p>leader 一直在请求 snapshot, 随后就 timeout 了.<br>apply snapshot 时 WriteRegionState 后解决.</p>
+]]></content>
+      <categories>
+        <category>database project</category>
+      </categories>
+      <tags>
+        <tag>TinyKV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TinyKV Project3 MultiRaftKV PartB</title>
+    <url>/2022/03/05/tinykv-project3-MultiRaftKV-PartB/</url>
+    <content><![CDATA[<p>TinyKV Project3 Part B.</p>
+<span id="more"></span>
+
+<h2 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h2><p>3B 主要涉及到 领导人变更(transfer leader) 节点变更(conf change) 以及 region 分裂(region split).</p>
+<h2 id="transfer-leader"><a href="#transfer-leader" class="headerlink" title="transfer leader"></a>transfer leader</h2><p>transfer leader 请求不需要作为一个 entry 在 Raft group 之中同步,<br>peer 在收到该请求时, 只需要向下传递给 Raft 层执行, 完成后返回 response 即可.</p>
+<h2 id="conf-change"><a href="#conf-change" class="headerlink" title="conf change"></a>conf change</h2><p>conf change 请求的主要作用是向 Raft group 中添加或删除 peer, 分为 add node 和 remove node 两种类型.</p>
+<p>add node: 在 Raft group 中添加节点, peer 只需要更改自己 peerStore 和 ctx.storeMeta 中的 region,<br>向其中添加 peer 即可. store_worker 在向该 peer 发送消息时才会新建 peer.</p>
+<p>吐槽: conf change 的消息类型以及处理方法为啥这么特别而又别扭? 是有什么特殊的考虑吗.</p>
+<p>remove node: 在 Raft group 中删除节点, 如果被删除的不是自己, peer 的行为与 add node 时类似,<br>如果删除的是自己, 直接调用 destroyPeer() 函数即可.</p>
+<h2 id="region-split"><a href="#region-split" class="headerlink" title="region split"></a>region split</h2><p>在数据写入后, split checker 会定期检测 region 的大小, 符合条件时, 生产 region split 的 key.</p>
+<h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><h3 id="1-handle-raft-message-failed-storeID-2-region-1-not-exists-but-not-tombstone"><a href="#1-handle-raft-message-failed-storeID-2-region-1-not-exists-but-not-tombstone" class="headerlink" title="1. handle raft message failed storeID 2, region 1 not exists but not tombstone"></a>1. handle raft message failed storeID 2, region 1 not exists but not tombstone</h3><p>process remove node 删除自己时, 首先调用了 destroyPeer() 修改 RaftLocalState tombstone,<br>后续没有判断这一情况, WriteRegionState 时又将 RaftLocalState 改为了 normal.</p>
+<h3 id="2-panic-region-1-6-unexpected-raft-log-index-lastIndex-0-lt-appliedIndex-5164"><a href="#2-panic-region-1-6-unexpected-raft-log-index-lastIndex-0-lt-appliedIndex-5164" class="headerlink" title="2. panic: [region 1] 6 unexpected raft log index: lastIndex 0 &lt; appliedIndex 5164"></a>2. panic: [region 1] 6 unexpected raft log index: lastIndex 0 &lt; appliedIndex 5164</h3><p>add node 在 store_worker 实际创建 peer 时报错.<br>raftState 和 applyState 分别从 kv engine 和 raft engine 中根据 region id 读取出,<br>applyState 是正常的, raftState 却是空的.</p>
+<p>原因: process 多个 entry 时, conf change 调用 destroyPeer 清空了 store,<br>下一条 entry 执行时又会更新 apply index, 重新写入了 applyState.</p>
+<p>process entry 时应该判断 d.stopped, 如果已经停止, 直接 return.</p>
+<h3 id="3-panic-request-timeout"><a href="#3-panic-request-timeout" class="headerlink" title="3. panic: request timeout"></a>3. panic: request timeout</h3><p>Raft group 中只有两个节点时, 再删除一个节点, 如果这个节点正好是 leader,<br>可能在 commit 消息发送前便把自己 destroy 了, 另一个节点便无法得知这一情况的发生, 永远无法选举成功.</p>
+<p>应该先 transfer leader 给剩下的节点, 直接返回错误, client 会进行重试, 再由剩下的节点来处理 remove node.</p>
+<h3 id="4-panic-resp-Responses-0-CmdType-raft-cmdpb-CmdType-Put"><a href="#4-panic-resp-Responses-0-CmdType-raft-cmdpb-CmdType-Put" class="headerlink" title="4. panic: resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put"></a>4. panic: resp.Responses[0].CmdType != raft_cmdpb.CmdType_Put</h3><p>在三个节点的集群中删除一个节点后会发生这个问题. 在 append proposal 处打日志后发现,<br>同一个 index 的 proposal append 了多次.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">2022/03/17 15:32:08.334664 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Snap, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334670 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Snap, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334682 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Put, index 16681[0m</span><br><span class="line">2022/03/17 15:32:08.334686 peer_msg_handler.go:598: [0;37m[info] [region 1] 3 append proposal type Put, index 16681[0m</span><br></pre></td></tr></table></figure>
+
+<p>propose entry 后, Raft 的 last index 没有发生变化. transferLeader 产生的错误没有正确返回.</p>
+<h3 id="5-test-test-go-221-0-31m-fatal-get-wrong-value-client-17"><a href="#5-test-test-go-221-0-31m-fatal-get-wrong-value-client-17" class="headerlink" title="5. test_test.go:221: [0;31m[fatal] get wrong value, client 17"></a>5. test_test.go:221: [0;31m[fatal] get wrong value, client 17</h3><p>与问题 4 相同.</p>
+<h3 id="6-panic-region-1-4-meta-corruption-detected"><a href="#6-panic-region-1-4-meta-corruption-detected" class="headerlink" title="6. panic: [region 1] 4 meta corruption detected"></a>6. panic: [region 1] 4 meta corruption detected</h3><p>测试用例: TestSplitConfChangeSnapshotUnreliableRecoverConcurrentPartition3B</p>
+<p>出错代码行: /root/tinykv/kv/raftstore/peer_msg_handler.go:867 +0x417</p>
+<p>destroyPeer() 中删除 storeMeta regionRanges 中的 regionItem 时,<br>发现并没有对应的 regionItem.</p>
+<p>applySnapshot() 后不应该在 storeMeta 中删除 prevRegion 的 regionRanges,<br>在分区的情况下, 一个节点并没有收到 split message,<br>分区恢复后, 新分裂的 region 的 peer 先被创建并收到 snapshot, 向 storeMeta 中写入,<br>另一个 peer 收到 snapshot 时如果删除 prevRegion, 就会导致 panic.<br>prevRegin 的 endKey 恰好是另一个 peer 的已经写入的 endKey, 因此不能删除它.</p>
+<h3 id="7-panic-split-peer-count-not-equal-to-region-peer-count"><a href="#7-panic-split-peer-count-not-equal-to-region-peer-count" class="headerlink" title="7. panic: split peer count not equal to region peer count"></a>7. panic: split peer count not equal to region peer count</h3><p>自定义的 panic, split request 中的 id 的数目可能与 目前集群中的节点数不相同, 应该拒绝这个请求.</p>
+<h3 id="8-panic-entries’-high-586-is-out-of-bound-lastIndex-584"><a href="#8-panic-entries’-high-586-is-out-of-bound-lastIndex-584" class="headerlink" title="8. panic: entries’ high 586 is out of bound, lastIndex 584"></a>8. panic: entries’ high 586 is out of bound, lastIndex 584</h3><p>leader 向 follower 连续发送两次快照, follower 应用第一个快照并返回 response 后,<br>leader 会向 follower 发送 append entries, 此时 follower 应用了第二个快照,<br>follower 接受到 entries 后发现他们的 index 比自己的 last index 小, 尝试替换自己的日志,<br>但自己又没有这些日志, 便会引发这个错误.</p>
+<p>解决方法: 不调用 panic 直接返回即可.</p>
+<h3 id="9-request-timeout"><a href="#9-request-timeout" class="headerlink" title="9. request timeout"></a>9. request timeout</h3><p>3B 中会遇到各种各样的 request timeout.</p>
+<h3 id="9-1-send-message-err-message-is-dropped"><a href="#9-1-send-message-err-message-is-dropped" class="headerlink" title="9.1 send message err: message is dropped"></a>9.1 send message err: message is dropped</h3><p>在没有分区的情况下, leader 一个时间段内发送的所有消息都丢失了. 没有查明原因, 这个问题会导致 leader 发送的 snapshot 很容易丢失,<br>又因为在 2C 中优化了快照的发送次数, 很容易导致超时.</p>
+<h3 id="9-2-tombstone-peer-receives-a-stale-message"><a href="#9-2-tombstone-peer-receives-a-stale-message" class="headerlink" title="9.2. tombstone peer receives a stale message"></a>9.2. tombstone peer receives a stale message</h3><p>超时前出现不停出现 tombstone peer receives a stale message 的日志.</p>
+<h3 id="9-3-1-12-14677-is-registered-more-than-1-time"><a href="#9-3-1-12-14677-is-registered-more-than-1-time" class="headerlink" title="9.3 1_12_14677 is registered more than 1 time"></a>9.3 1_12_14677 is registered more than 1 time</h3><p>send snapshot 后出现这条错误. 超时前不停地出现这条错误.<br>当集群中只有两个节点 1, 2 时, 1 向 2 发送快照, 2 handel 后发送的 response 丢失了,<br>这时 1 无法 commit 新的 entry, 也无法发送同样的快照给2, 集群就这样永远不可用了.</p>
+<p>l.Index2Position(i) &lt; len(l.entries)</p>
+]]></content>
+      <categories>
+        <category>database project</category>
+      </categories>
+      <tags>
+        <tag>TinyKV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>所有分类</title>
+    <url>/categories/index.html</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>所有标签</title>
+    <url>/tags/index.html</url>
+    <content><![CDATA[]]></content>
+  </entry>
+</search>
