@@ -14,7 +14,7 @@
 
 
 
-<title>TiDB-PD | Moonm3n&#39;s blog</title>
+<title>OtterTune-论文研读 | Moonm3n&#39;s blog</title>
 
 
 
@@ -120,8 +120,8 @@
             
                 
                     <span class="post-tag">
-                        <a href="/tags/TiDB/">
-                            TiDB
+                        <a href="/tags/Automatic-Configuration-Tuning/">
+                            Automatic Configuration Tuning
                         </a>
                     </span>    
                            
@@ -130,12 +130,12 @@
         <div class="post-title">
             
             
-                TiDB-PD
+                OtterTune-论文研读
             
             
         </div>
         <span class="post-date">
-            3月 22, 2022
+            5月 8, 2023
         </span>
     </div>
     <div class="post-img">
@@ -145,39 +145,7 @@
     </div>
 </div>
     <div class="post-content">
-    <p>PD 是 TiDB 里的全局中心总控节点, 主要负责全局元信息的存储以及 TiKV 集群负载均衡调度.</p>
-<span id="more"></span>
-
-<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p>PD 是一个逻辑上的单点, 物理上是一个集群, 集成 etcd, 支持故障恢复, 保证了强一致性.<br>PD 功能可以分为三类:</p>
-<ol>
-<li>路由</li>
-<li>元数据管理</li>
-<li>调度</li>
-</ol>
-<p>TiKV 中的 Region Leader 与 Store 会定期向 PD 发送 Heartbeat, Heartbeat 中包含了 Region 和 Store 的各种状态信息,<br>PD 根据状态信息来调度 TiKV 集群的负载均衡, 将 Operator 通过 Heartbeat response 回复给 TiKV.</p>
-<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="1-Scheduler"><a href="#1-Scheduler" class="headerlink" title="1. Scheduler"></a>1. Scheduler</h3><p>Scheduler 是用来调度资源的接口, 调度器通过状态信息生成 Operator.</p>
-<h3 id="2-Operator"><a href="#2-Operator" class="headerlink" title="2. Operator"></a>2. Operator</h3><p>Operator 是 PD 对 TiKV 的调度操作的集合, 可以由其他 Operator 组合而成.</p>
-<h3 id="3-Selector-Filter"><a href="#3-Selector-Filter" class="headerlink" title="3. Selector/Filter"></a>3. Selector/Filter</h3><p>Selector 与 Filter 负责选择调度操作的 source 与 target.</p>
-<h3 id="4-Controller"><a href="#4-Controller" class="headerlink" title="4. Controller"></a>4. Controller</h3><p>Controller 负责控制整个调度的速度.</p>
-<h3 id="5-Coordinator"><a href="#5-Coordinator" class="headerlink" title="5. Coordinator"></a>5. Coordinator</h3><p>Coordinator 在 Region Heartbeat 会检测 Region 是否需要调度, 如果需要, 则进行调度.</p>
-<p>PD 中有许多调度器, 每个调度器是独立运行的, 有着不同的调度目的.<br>常见的调度器有:</p>
-<ul>
-<li>balance-leader-scheduler: 保持不同节点的 Leader 均衡.</li>
-<li>balance-region-scheduler: 保持不同节点的 Region 均衡.</li>
-<li>hot-region-scheduler: 保持不同节点的读写热点 Region 均衡.</li>
-<li>evict-leader-{store-id}: 驱逐某个节点的所有 Leader.</li>
-</ul>
-<h2 id="调度流程"><a href="#调度流程" class="headerlink" title="调度流程"></a>调度流程</h2><p>调度的流程大体上可以分为三部分:</p>
-<ol>
-<li><p>信息收集<br>Region Leader 周期性地上报 RegionHeartbeat 心跳, 包含了 Region 范围, 副本分布, 副本状态, 数据量, 读写流量等数据.<br>Store 周期性地上报 StoreHeartbeat 心跳, 包含了 Store 的基本信息, 容量, 剩余空间, 读写流量等数据.</p>
-</li>
-<li><p>生成调度</p>
-</li>
-<li><p>执行调度<br>将 Operator Step 下发给对应 Region 的 Leader.</p>
-</li>
-</ol>
-<p>集群的元信息、TSO 信息、Region 信息 持久化在 etcd 中.<br>Store 与 Region 的状态存在 cache 中.</p>
-
+    
 </div> 
 
 <script>
@@ -188,17 +156,12 @@
     <nav class="post-nav">
         <div class="prev-item">
            
-                <div class="icon arrow-left"></div>
-                <div class="post-link">
-                    <a href="/2023/05/08/OtterTune-%E8%AE%BA%E6%96%87%E7%A0%94%E8%AF%BB/">Prev</a>
-                </div>
-            
         </div>
         <div class="next-item">
             
                 <div class="icon arrow-right"></div>
                 <div class="post-link">
-                  <a href="/2022/03/05/tinykv-project3-MultiRaftKV-PartB/">Next</a>  
+                  <a href="/2022/03/22/TiKV-PD/">Next</a>  
                 </div>  
             
         </div>
